@@ -8,13 +8,16 @@
 <body>
 
     <h1>Quiz Result</h1>
-
-    <p>Thank you for submitting your answers!</p>
+    <h2>Here are the correct answers</h2>
     <ul>
-        {% for question_id, user_response in user_responses.items() %}
-            <li>Question {{ question_id }}: {{ user_response }}</li>
+        {% for letters in correct_letters: %}
+            <li>Question {{letters[0]['question_id']}} : {{letters[0]['letter']}}, {{letters[0]['content']}}</li>
+
         {% endfor %}
+
     </ul>
+   
+<h2>Your Score is: {{correct_answer}} out of {{total_questions}}, {{score_percentage}}%</h2>
 
 </body>
 </html>

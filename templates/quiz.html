@@ -12,10 +12,10 @@
     <h1>Quiz</h1>
     <h2>Choose the best answer among the choices</h2>
 
-    <form action="/submit" method="post">
+    <form action="/electronics" method="post">
         {% for question in questions %}
             <div>
-                <p>{{ question['content'] }}</p>
+                <p>{{ question['id']}}. {{question['content'] }}</p>
                 {% for option in question['options'] %}
                     <label>
                         <input type="radio" name="q{{ question['id'] }}" value="{{ option['letter'] }}">
@@ -25,6 +25,7 @@
             </div>
         {% endfor %}
         <input type="hidden" name="user_id" value="1"> <!-- You can replace '1' with the actual user ID -->
+        <br>
         <button type="submit">Submit Answers</button>
     </form>
 
