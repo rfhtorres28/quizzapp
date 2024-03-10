@@ -39,9 +39,8 @@ def elecs():
          score_percentage = no_correct_answer/total_questions*100
          score_percentage = round(score_percentage, 2)
          
-         return render_template('result.html', correct_answers=correct_answers, 
-        no_correct_answer=no_correct_answer, total_questions=total_questions, score_percentage=score_percentage, user_responses=user_responses, 
-        ece_questions=ece_questions)
+         return render_template('result1.html', form=form, score_percentage=score_percentage,
+         no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers)
             
        
   

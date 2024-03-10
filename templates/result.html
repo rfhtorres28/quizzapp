@@ -15,7 +15,7 @@
                 {%for correct_answer in correct_answers%}
                     {%if correct_answer[0]["question_id"]==question["id"]%}
 
-              <li>{{question["content"]}} Correct Answer: {{correct_answer[0]["content"]}}</li>    
+              <li>{{question["content"]}} User Correct Answer: {{correct_answer[0]["content"]}}</li>    
 
                     {%endif%}  
                 {% endfor %}

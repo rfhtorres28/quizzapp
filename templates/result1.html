@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results</title>
+    <link rel="stylesheet" href="static/main.css">
+
+    <style>
+        body, h1, h2, ol, form, p, label {
+            margin: 5px;
+            padding-left: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Quiz Results</h1>
+    <h2>Here are your answers:</h2>
+
+    <ol type="1">
+        {% for field in form %}
+            {% if field.name not in ['csrf_token', 'user_id'] %}
+                <li>
+                    <p>{{ field.label.text }}</p>
+                    {% for option in field.choices %}
+                        <label>
+                            <input type="radio" name="{{ field.id }}" value="{{ option[0] }}" {% if option[0] == field.data %} checked{% endif %} disabled> <!-- "checked" attribute is used when making a radio button selected by default -->
+                            {{ option[1] }}
+                        </label><br>
+                    {% endfor %}
+                    {% if field.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in field.errors %}
+                                <span>{{ error }}</span><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% for correct_answer in correct_answers %}
+                            
+                            {%if correct_answer[0]['question_id'] == field.id %}
+                                <p>Correct Answer: {{correct_answer[0]['content']}}</p>
+                            {%endif%}
+                    {%endfor%}
+                      <!-- field.data contains the submitted answer of the user -->
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ol>
+    <p>Overall Score: {{no_correct_answer}} out of {{total_questions}}, {{score_percentage}}%</p>
+    <br>
+    <button type="button" onclick="window.history.back()">Go Back</button>
+</body>
+</html>
