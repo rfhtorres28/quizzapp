@@ -10,14 +10,21 @@
     <h1>Quiz Result</h1>
     <h2>Here are the correct answers</h2>
     <ul>
-        {% for letters in correct_letters: %}
-            <li>Question {{letters[0]['question_id']}} : {{letters[0]['letter']}}, {{letters[0]['content']}}</li>
+    <ol type = "1"> 
+        {% for question in ece_questions: %}
+                {%for correct_answer in correct_answers%}
+                    {%if correct_answer[0]["question_id"]==question["id"]%}
 
+              <li>{{question["content"]}} Correct Answer: {{correct_answer[0]["content"]}}</li>    
+
+                    {%endif%}  
+                {% endfor %}
         {% endfor %}
+    </ol>
 
     </ul>
    
-<h2>Your Score is: {{correct_answer}} out of {{total_questions}}, {{score_percentage}}%</h2>
+<h2>Your Score is: {{no_correct_answer}} out of {{total_questions}}, {{score_percentage}}%</h2>
 
 </body>
 </html>

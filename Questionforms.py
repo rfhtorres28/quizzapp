@@ -1,17 +1,17 @@
 from flask_wtf import FlaskForm
 from wtforms import RadioField, HiddenField
-from wtforms.validators import DataRequired
+from wtforms.validators import InputRequired
 from ECEbank import ece_questions
 
 
 class QuizForm(FlaskForm):
-
-    q1_choices = [(option['letter'], option['content']) for option in ece_questions[0]['options']]
-    q2_choices = [(option['letter'], option['content']) for option in ece_questions[1]['options']]
-    q3_choices = [(option['letter'], option['content']) for option in ece_questions[2]['options']]
-
-    q1 = RadioField(ece_questions[0], choices=q1_choices, validators=[DataRequired()])
-    q2 = RadioField(ece_questions[1], choices=q2_choices, validators=[DataRequired()])
-    q3 = RadioField(ece_questions[2], choices=q3_choices, validators=[DataRequired()])
-
     user_id = HiddenField()
+
+def create_dynamic_fields(questions):
+    for i, question in enumerate(questions, start=1):
+        choices = [(option['letter'], option['content']) for option in question['options']]
+        field_name = f'q{i}'
+        field_label = question['content']
+        setattr(QuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
+
+create_dynamic_fields(ece_questions)

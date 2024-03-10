@@ -5,40 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
     <link rel="stylesheet" href="static/main.css">
+
+    <style>
+        body, h1, h2, ol, form, p, label {
+            margin: 5px;
+            padding-left: 6px;
+        }
+       
+    </style>
+    
 </head>
 
 <body>
 
     <h1>Quiz</h1>
     <h2>Choose the best answer among the choices</h2>
-
+    
     <form action="/electronics" method="post">
         {{ form.csrf_token }}
-    
-        {% for question in form %}
-        <div>
-            <p>{{ question.label.text['content']}}</p>
-                {% for option in question.choices %}
+
+        <ol type = "1">
+        {% for field in form %}
+        {% if field.name not in ['csrf_token', 'user_id'] %}
+        
+            <li>
+            
+            <p>{{ field.label.text}}</p>
+            {% for option in field.choices %}
                     <label>
-                        <input type="radio" name="q{{ question.label.text['id'] }}" value="{{ option[0]}}"> <!-- This is for user input letter choice -->
+                        <input type="radio" name="{{field.id}}" value="{{ option[0]}}"> <!-- This is for user input letter choice, the field.id is automatically generated -->
 
                         {{ option[1] }} <!-- This is to display the content of the choices (access the content of the tuple in the question forms)-->
                     </label><br>
-                {% endfor %}
-                {% if question.errors %}
-            <div class="invalid-feedback">
-                {% for error in question.errors %}
-                <span>{{ error }}</span><br>
-                {% endfor %}
-            </div>
-            {% endif %}
-                    
-        </div>
+            {% endfor %}
+                {% if field.errors %}
+                <div class="invalid-feedback">
+                     {% for error in field.errors %}
+                        <span>{{ error }}</span><br>
+                     {% endfor %}
+                </div>
+                {% endif %}
+        
+            </li> 
+        
+
+        {% endif %}
         {% endfor %}
+        </ol>
+         
        
         <br>
         <button type="submit">Submit Answers</button>
     </form>
+    
 
 </body>
 </html>

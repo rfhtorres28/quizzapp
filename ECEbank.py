@@ -33,6 +33,18 @@ ece_questions = [
 
     ]
 
+},
+
+{
+    'id': 4, 
+    'content': 'What is the meaning of F in FET transistor?',
+    'options': [
+            {'question_id':4,'letter': 'a', 'content': 'Field', 'is_correct':True},
+            {'question_id':4, 'letter': 'b', 'content': 'FET', 'is_correct': False},
+            {'question_id':4, 'letter': 'c', 'content': 'Fierce', 'is_correct': False}
+
+    ]
+
 }
 
 ]
