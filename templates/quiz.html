@@ -23,7 +23,7 @@
     
     <form action="/electronics" method="post">
         {{ form.csrf_token }}
-
+        <input type="hidden" name="user_id" value="{{ session.user_id }}">
         <ol type = "1">
         {% for field in form %}
         {% if field.name not in ['csrf_token', 'user_id'] %}
