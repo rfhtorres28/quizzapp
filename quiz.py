@@ -7,14 +7,16 @@ from ECEbank import ece_questions
 from flask_wtf import FlaskForm
 from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import InputRequired, DataRequired, Length, Email, EqualTo, ValidationError
-
+from collections import defaultdict
+from flask_restful import Api, Resource
+import random
 
 #-----Initializing the flask app-------#
         
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '582ea1bb8309ccf43fd65b39d593a6a6'
 bcrypt = Bcrypt(app)
-
+api = Api(app)
 
 #------ Creating a user database -------#
 
@@ -29,6 +31,8 @@ database_name= 'user'
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{username}:{password}@{host}:{port}/{database_name}'
 db = SQLAlchemy(app)
 
+
+#---- Creating table for User Details ----#
 class UserDetails(db.Model, UserMixin):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -45,7 +49,55 @@ class UserDetails(db.Model, UserMixin):
         self.password = password
 
 
+#---- Creating table for Questions ----#
+        
+class Question(db.Model):
 
+    __tablename__ = 'questions'
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(255), nullable=False)
+    options = db.relationship('Options', backref='questions', lazy=True)
+
+
+
+class Options(db.Model):
+
+    __tablename__ = 'options'
+    id = db.Column(db.Integer, primary_key=True)
+    question_no = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
+    letter = db.Column(db.String(1), nullable=False )
+    content = db.Column(db.String(255), nullable=False)
+    is_correct = db.Column(db.Boolean, nullable=False)
+
+
+db.create_all()
+
+for specific_question in ece_questions:
+
+    existing_question = Question.query.filter_by(content=specific_question['content']).first()
+    if existing_question:
+        question_id = existing_question.id
+    else:
+        # If the question doesn't exist, add it to the database
+        question = Question(content=specific_question['content'])
+        db.session.add(question)
+        db.session.commit()
+        question_id = question.id
+
+    for option in specific_question['options']:
+        existing_option = Options.query.filter_by(question_no=question_id, content=option['content']).first()
+        if existing_option:
+            # Option already exists, no need to add it again
+            continue
+        else:
+             specific_option = Options(question_no=question_id,
+                                  letter=option['letter'], 
+                                  content=option['content'],
+                                  is_correct=option['is_correct'])
+             db.session.add(specific_option)
+             db.session.commit()
+
+db.session.close()
 
 
 #----- Creating a Quiz Form ------#
@@ -59,8 +111,9 @@ def create_dynamic_fields(questions):
         field_label = question['content']
         setattr(QuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
 
-create_dynamic_fields(ece_questions)
 
+
+create_dynamic_fields(ece_questions)
 
 #----- Creating the Registration Form ------#
 class RegistrationForm(FlaskForm):
@@ -127,7 +180,7 @@ def register():
           user = UserDetails(username=form.username.data, email=form.email.data, password=hashed_password)
           db.session.add(user)
           db.session.commit()
-          flash('Your account has been sucessfully created!', 'success')
+          flash('Your account has been sucessfully created! You may now login', 'success')
         
           return redirect(url_for('login')) # return here ensures that the url for home page is sent back (return back) to the clients browser
 
@@ -176,24 +229,26 @@ def elecs():
     total_questions = len(ece_questions)
     user_responses = {}
     form = QuizForm() 
-
+    
     if request.method == 'POST':
        if form.validate_on_submit():
-            form_data = request.form.to_dict()
-        
-            for question in ece_questions: # loop through the list of dictionary questions
-                user_response = form_data.get(f'q{question["id"]}') # return the value pair from the form data 
-                correct_response = [x for x in question['options'] if x['is_correct']==True] # this return the correct answer for each question
-                correct_answers.append(correct_response) # or correct_letters.append(correct_response[0] if correct_response else None)
-                user_responses[f'q{question["id"]}'] = user_response
-                if user_response == correct_response[0]["letter"]:
+         form_data = request.form.to_dict()
+    
+   
+       for question in ece_questions: # loop through the list of dictionary questions
+            user_response = form_data.get(f'q{question["id"]}') # return the value pair from the form data 
+            correct_response = [x for x in question['options'] if x['is_correct']==True] # this return the correct answer for each question
+            correct_answers.append(correct_response) # or correct_letters.append(correct_response[0] if correct_response else None)
+            user_responses[f'q{question["id"]}'] = user_response
+            if user_response == correct_response[0]["letter"]:
                        no_correct_answer += 1
 
-            score_percentage = no_correct_answer/total_questions*100
-            score_percentage = round(score_percentage, 2)
+       score_percentage = no_correct_answer/total_questions*100
+       score_percentage = round(score_percentage, 2)
          
-   
-     
+       return render_template('result1.html', form=form, score_percentage=score_percentage,
+       no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers)
+       
     return render_template('quiz.html', questions=ece_questions, form=form)
 
  

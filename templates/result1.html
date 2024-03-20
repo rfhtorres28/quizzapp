@@ -16,8 +16,12 @@
 
 <body>
     <h1>Quiz Results</h1>
-    <h2>Here are your answers:</h2>
-
+    <h2>Summary</h2>
+    <div class="border-top pt-3">
+        <small class="text-muted">
+         <a class="ml-2" href="{{ url_for('logout') }}">Log out</a>
+        </small>
+    </div>
     <ol type="1">
         {% for field in form %}
             {% if field.name not in ['csrf_token', 'user_id'] %}
@@ -47,8 +51,8 @@
             {% endif %}
         {% endfor %}
     </ol>
-    <p>Overall Score: {{no_correct_answer}} out of {{total_questions}}, {{score_percentage}}%</p>
+    <p>Score: {{no_correct_answer}} out of {{total_questions}}, {{score_percentage}}%</p>
     <br>
-    <button type="button" onclick="window.history.back()">Go Back</button>
+    <button type="button" onclick="window.location.href = '{{url_for('elecs')}}';">Restart the Test</button>
 </body>
 </html>
