@@ -1,22 +1,21 @@
-from flask import Flask, request, render_template, url_for, flash, jsonify, redirect, get_flashed_messages
+from flask import Flask, request, render_template, url_for, flash, redirect, get_flashed_messages
 from ECEbank import ece_questions
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt 
-from flask_login import  UserMixin, current_user, LoginManager, login_user, logout_user
+from flask_login import current_user, LoginManager, login_user, logout_user
 from ECEbank import ece_questions
 from flask_wtf import FlaskForm
 from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import InputRequired, DataRequired, Length, Email, EqualTo, ValidationError
-from collections import defaultdict
-from flask_restful import Api, Resource
-import random
+from globaldatabase import init_db
+
 
 #-----Initializing the flask app-------#
         
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '582ea1bb8309ccf43fd65b39d593a6a6'
 bcrypt = Bcrypt(app)
-api = Api(app)
+
 
 #------ Creating a user database -------#
 
@@ -26,78 +25,15 @@ port = '3306'
 host = 'localhost'
 database_name= 'user'
 
+
 #-----Initializing the Database-------#
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{username}:{password}@{host}:{port}/{database_name}'
-db = SQLAlchemy(app)
+init_db(app)
 
 
-#---- Creating table for User Details ----#
-class UserDetails(db.Model, UserMixin):
+from Database import UserDetails, Question, Options
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(10), unique = True, nullable = False) 
-    email = db.Column(db.String(50), unique = True, nullable = False)
-    password = db.Column(db.String(255), unique = True, nullable = False)
-
-
-    def __init__ (self, username, email, password):
-
-       
-        self.username = username
-        self.email = email
-        self.password = password
-
-
-#---- Creating table for Questions ----#
-        
-class Question(db.Model):
-
-    __tablename__ = 'questions'
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(255), nullable=False)
-    options = db.relationship('Options', backref='questions', lazy=True)
-
-
-
-class Options(db.Model):
-
-    __tablename__ = 'options'
-    id = db.Column(db.Integer, primary_key=True)
-    question_no = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
-    letter = db.Column(db.String(1), nullable=False )
-    content = db.Column(db.String(255), nullable=False)
-    is_correct = db.Column(db.Boolean, nullable=False)
-
-
-db.create_all()
-
-for specific_question in ece_questions:
-
-    existing_question = Question.query.filter_by(content=specific_question['content']).first()
-    if existing_question:
-        question_id = existing_question.id
-    else:
-        # If the question doesn't exist, add it to the database
-        question = Question(content=specific_question['content'])
-        db.session.add(question)
-        db.session.commit()
-        question_id = question.id
-
-    for option in specific_question['options']:
-        existing_option = Options.query.filter_by(question_no=question_id, content=option['content']).first()
-        if existing_option:
-            # Option already exists, no need to add it again
-            continue
-        else:
-             specific_option = Options(question_no=question_id,
-                                  letter=option['letter'], 
-                                  content=option['content'],
-                                  is_correct=option['is_correct'])
-             db.session.add(specific_option)
-             db.session.commit()
-
-db.session.close()
 
 
 #----- Creating a Quiz Form ------#
@@ -114,6 +50,8 @@ def create_dynamic_fields(questions):
 
 
 create_dynamic_fields(ece_questions)
+
+
 
 #----- Creating the Registration Form ------#
 class RegistrationForm(FlaskForm):
@@ -169,7 +107,6 @@ def home():
 
 
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
@@ -217,7 +154,6 @@ def logout():
 
 
 
-
 @app.route('/electronics', methods=['GET', 'POST'])
 def elecs():
 
@@ -228,11 +164,12 @@ def elecs():
     correct_answers = []
     total_questions = len(ece_questions)
     user_responses = {}
+    form_data = {}
     form = QuizForm() 
     
     if request.method == 'POST':
        if form.validate_on_submit():
-         form_data = request.form.to_dict()
+         form_data = request.form.to_dict()  
     
    
        for question in ece_questions: # loop through the list of dictionary questions
@@ -252,5 +189,6 @@ def elecs():
     return render_template('quiz.html', questions=ece_questions, form=form)
 
  
+
 if __name__ == '__main__':
     app.run(debug=True)
