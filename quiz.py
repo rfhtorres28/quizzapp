@@ -1,18 +1,19 @@
-from flask import Flask, request, render_template, url_for, flash, redirect, get_flashed_messages
+from flask import Flask, request, render_template, url_for, flash, redirect, get_flashed_messages, make_response, jsonify
+from flask_restful import Api, Resource
 from ECEbank import ece_questions
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt 
 from flask_login import current_user, LoginManager, login_user, logout_user
-from ECEbank import ece_questions
 from flask_wtf import FlaskForm
 from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import InputRequired, DataRequired, Length, Email, EqualTo, ValidationError
-from globaldatabase import init_db
+from flask_login import UserMixin
+from flask_sqlalchemy import SQLAlchemy
 
 
 #-----Initializing the flask app-------#
         
 app = Flask(__name__)
+api = Api(app)
 app.config['SECRET_KEY'] = '582ea1bb8309ccf43fd65b39d593a6a6'
 bcrypt = Bcrypt(app)
 
@@ -23,16 +24,50 @@ username='root'
 password= 'Toootsie@1430'
 port = '3306'
 host = 'localhost'
-database_name= 'user'
+database_name= 'quiz'
 
 
 #-----Initializing the Database-------#
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{username}:{password}@{host}:{port}/{database_name}'
-init_db(app)
+db = SQLAlchemy(app)
 
 
-from Database import UserDetails, Question, Options
+class UserDetails(db.Model, UserMixin):
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(10), unique = True, nullable = False) 
+    email = db.Column(db.String(50), unique = True, nullable = False)
+    password = db.Column(db.String(255), unique = True, nullable = False)
+
+
+    def __init__ (self, username, email, password):
+
+       
+        self.username = username
+        self.email = email
+        self.password = password
+
+class Question(db.Model):
+
+    __tablename__ = 'questions'
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(255), nullable=False)
+    options = db.relationship('Options', backref='questions', lazy=True)
+
+
+
+class Options(db.Model):
+
+    __tablename__ = 'options'
+    id = db.Column(db.Integer, primary_key=True)
+    question_no = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
+    letter = db.Column(db.String(1), nullable=False )
+    content = db.Column(db.String(255), nullable=False)
+    is_correct = db.Column(db.Boolean, nullable=False)
+
+
+
 
 
 
@@ -41,6 +76,7 @@ class QuizForm(FlaskForm):
     user_id = HiddenField()
 
 def create_dynamic_fields(questions):
+    
     for i, question in enumerate(questions, start=1):
         choices = [(option['letter'], option['content']) for option in question['options']]
         field_name = f'q{i}'
@@ -48,8 +84,13 @@ def create_dynamic_fields(questions):
         setattr(QuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
 
 
+qn = Question.query.all()
+opn = Options.query.all()
+ece_questions = [{"id":question.id, "content":question.content,
+                "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
 
 create_dynamic_fields(ece_questions)
+
 
 
 
@@ -154,41 +195,54 @@ def logout():
 
 
 
-@app.route('/electronics', methods=['GET', 'POST'])
-def elecs():
-
-    if not current_user.is_authenticated :
-        return redirect(url_for('login'))
-    
-    no_correct_answer = 0
-    correct_answers = []
-    total_questions = len(ece_questions)
-    user_responses = {}
-    form_data = {}
-    form = QuizForm() 
-    
-    if request.method == 'POST':
-       if form.validate_on_submit():
-         form_data = request.form.to_dict()  
-    
+class Electronics(Resource):
    
-       for question in ece_questions: # loop through the list of dictionary questions
-            user_response = form_data.get(f'q{question["id"]}') # return the value pair from the form data 
-            correct_response = [x for x in question['options'] if x['is_correct']==True] # this return the correct answer for each question
-            correct_answers.append(correct_response) # or correct_letters.append(correct_response[0] if correct_response else None)
-            user_responses[f'q{question["id"]}'] = user_response
-            if user_response == correct_response[0]["letter"]:
-                       no_correct_answer += 1
+  
 
-       score_percentage = no_correct_answer/total_questions*100
-       score_percentage = round(score_percentage, 2)
-         
-       return render_template('result1.html', form=form, score_percentage=score_percentage,
-       no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers)
+   def get(self):
+       if not current_user.is_authenticated:
+            return redirect(url_for('login'))
        
-    return render_template('quiz.html', questions=ece_questions, form=form)
+       form = QuizForm() 
+       return make_response(render_template('quiz.html', questions=ece_questions, form=form))
+       
+   
+   def post(self):
+            
+            form = QuizForm() 
+            no_correct_answer = 0
+            correct_answers = []
+            total_questions = len(ece_questions)
+            user_responses = {}
+            form_data = {}
 
- 
+            if form.validate_on_submit():
+                form_data = request.form.to_dict()  
+    
+            for question in ece_questions: 
+                user_response = form_data.get(f'q{question["id"]}') 
+                correct_response = [x for x in question['options'] if x['is_correct']==True] 
+                correct_answers.append(correct_response) 
+                user_responses[f'q{question["id"]}'] = user_response
+                if user_response == correct_response[0]["letter"]:
+                    no_correct_answer += 1
+
+  
+            score_percentage = no_correct_answer/total_questions*100
+            score_percentage = round(score_percentage, 2)
+         
+            return make_response(render_template('result1.html', form=form, score_percentage=score_percentage,
+                                  no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers))
+   
+   
+       
+
+
+api.add_resource(Electronics, '/electronics')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+# render_template typically returns an html string so use make_response() to ensure 
