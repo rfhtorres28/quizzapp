@@ -194,6 +194,14 @@ def logout():
 
 
 
+@app.errorhandler(404)
+def page_not_found(error):
+    if request.path.endswith('.html'):
+        return render_template('404.html'), 404
+    
+    else:
+        return "Page Not Found", 404 
+
 
 class Electronics(Resource):
    
