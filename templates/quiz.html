@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz</title>
+    <title>Electronics MCQ's</title>
     <link rel="stylesheet" href="static/main.css">
 
     <style>
@@ -22,10 +22,15 @@
          <a class="ml-2" href="{{ url_for('logout') }}">Log out</a>
         </small>
     </div>
-    <h1>Quiz</h1>
+    <div class="border-top pt-3">
+        <small class="text-muted">
+         <a class="ml-2" href="{{ url_for('home') }}">Home</a>
+        </small>
+    </div>
+    <h1>Electronics</h1>
     <h2>Choose the best answer among the choices</h2>
-    
-    <form action="/electronics" method="post">
+    <br>
+    <form action="/home/electronics" method="post">
         {{ form.csrf_token }}
         <input type="hidden" name="user_id" value="{{ session.user_id }}">
         <ol type = "1">

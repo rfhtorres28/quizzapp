@@ -11,7 +11,16 @@
             margin: 5px;
             padding-left: 6px;
         }
-       
+        .form-control {
+            width: 200px; /* Adjust this value to change the length of the input fields */
+        }
+        .content-section {
+    max-width: 400px; /* Adjust this value to change the maximum width of the form */
+    margin: 1 auto; /* This will center the form horizontally */
+        }
+
+   
+
     </style>
     
 </head>
@@ -24,7 +33,7 @@
         <form method="POST" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Already have an account? Signup Now</legend>
+                <legend class="border-bottom mb-3">Signup Now</legend>
                 <div class="form-group">
                     {{ form.username.label(class="form-control-label") }}
 
@@ -88,10 +97,18 @@
                     {%endif %}
         
                 </div>
+                <br>
+                
             </fieldset>
             <br>
             <div class="form-group">
                 {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+            <br>
+            <div>
+                <small class="text-muted">
+                    <a class="ml-2" href="{{ url_for('login') }}">Already have an account? Click here to login</a>
+                </small>
             </div>
         </form>
 

@@ -4,16 +4,47 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Home</title>
+        <style>  nav {
+                background-color: #333; /* Background color of the navigation bar */
+                color: #fff; /* Text color of the navigation links */
+                padding: 10px; /* Padding around the navigation links */
+            }
+            ul {
+                list-style-type: none; /* Remove bullet points from the list */
+                margin: 0; /* Remove default margin */
+                padding: 0; /* Remove default padding */
+            }
+            li {
+                display: inline; /* Display list items horizontally */
+                margin-right: 20px; /* Add spacing between navigation links */
+            }
+             li.register {
+            float: right; /* Float the "Math" list item to the right */
+        }
+        li.login {
+            float: right; /* Float the "Math" list item to the right */
+        }
+            a {
+                color: #fff; /* Text color of the navigation links */
+                text-decoration: none; /* Remove underline from links */
+            }</style>
     
 </head>
 <body>
 <h1>ECEbix</h1>
 
-<h2>Choose Topics</h2>
-<a href = "{{url_for('electronics')}}">Electronics</a>
+<nav>
+        <ul>
+            <li><a href = "{{url_for('electronics')}}">Electronics</a></li>
+            <li><a href = "{{url_for('electronics')}}">Communications</a></li>
+            <li><a href = "{{url_for('electronics')}}">GEAS</a></li>
+            <li><a href = "{{url_for('electronics')}}">Math</a></li>
+            <li class="register"><a href = "{{url_for('register')}}">Register</a></li>
+            <li class="login"><a href = "{{url_for('login')}}">Login</a></li>
+        </ul>
 
 
-
+    </nav>
 </body>
 
 

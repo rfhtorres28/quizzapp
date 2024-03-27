@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correct Answers</title>
+</head>
+<body>
+    <h2>Correct Answers</h2>
+    <ol>
+        {%for correct_answer in correct_answers%}
+        <li>{{correct_answer[0]['content']}}</li>
+        {%endfor%}
+    
+    </ol>
+<button type="button" onclick="window.location.href = '{{url_for('home')}}';">Back to Home</button> 
+<div>
+<br>
+<button type="button" onclick="window.location.href = '{{url_for('electronics')}}';">Restart the Test</button>    
+</div>   
+</body>
+</html>

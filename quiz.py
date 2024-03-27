@@ -1,8 +1,7 @@
 from flask import Flask, request, render_template, url_for, flash, redirect, get_flashed_messages, make_response, jsonify
 from flask_restful import Api, Resource
-from ECEbank import ece_questions
 from flask_bcrypt import Bcrypt 
-from flask_login import current_user, LoginManager, login_user, logout_user
+from flask_login import current_user, LoginManager, login_user, logout_user, login_required 
 from flask_wtf import FlaskForm
 from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import InputRequired, DataRequired, Length, Email, EqualTo, ValidationError
@@ -90,7 +89,6 @@ ece_questions = [{"id":question.id, "content":question.content,
                 "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
 
 create_dynamic_fields(ece_questions)
-
 
 
 
@@ -205,8 +203,7 @@ def page_not_found(error):
 
 class Electronics(Resource):
    
-  
-
+   @login_required
    def get(self):
        if not current_user.is_authenticated:
             return redirect(url_for('login'))
@@ -246,7 +243,22 @@ class Electronics(Resource):
        
 
 
-api.add_resource(Electronics, '/electronics')
+api.add_resource(Electronics, '/home/electronics')
+
+
+@app.route('/home/electronics/answers')
+@login_required #Safety feature so that user that is not authenticated cant access the correct answers
+def answers():
+    correct_answers = []
+    if current_user.is_authenticated:
+        for question in ece_questions:
+            correct_response = [x for x in question['options'] if x['is_correct']==True] 
+            correct_answers.append(correct_response) 
+    
+    return render_template('correct_answers.html', correct_answers=correct_answers)
+
+
+
 
 
 if __name__ == '__main__':
