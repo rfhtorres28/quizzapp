@@ -142,11 +142,11 @@ def load_user(user_id):
 #----- Creating the endpoint routes ------#
 @app.route('/home', methods=['GET'])
 def home():
-    return render_template('home.html')
+    return render_template('homev1.html')
 
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/member-register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
         
@@ -166,7 +166,7 @@ def register():
         
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/member-login', methods=['GET', 'POST'])
 def login():
 
     form = LoginForm()
@@ -175,14 +175,20 @@ def login():
         user = UserDetails.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user) # Get the state of the user that is currently login, so it means that if a user logs in, it is stored in the login_user()
-            return redirect(url_for('home'))
+            return redirect(url_for('courses'))
         
+
         else:
             flash('Login Unsuccessful, Please Try again', 'error')
             return redirect(url_for('login'))
     
     return render_template('login_quiz.html', form=form, messages=messages)
 
+
+
+@app.route("/courses")
+def courses():
+    return render_template('homev2.html')
 
 
 @app.route("/logout")
@@ -243,10 +249,10 @@ class Electronics(Resource):
        
 
 
-api.add_resource(Electronics, '/home/electronics')
+api.add_resource(Electronics, '/courses/electronics')
 
 
-@app.route('/home/electronics/answers')
+@app.route('/courses/electronics/answers')
 @login_required #Safety feature so that user that is not authenticated cant access the correct answers
 def answers():
     correct_answers = []
