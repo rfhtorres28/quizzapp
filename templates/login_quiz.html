@@ -15,7 +15,12 @@
     max-width: 300px; /* Adjust this value to change the maximum width of the form */
     margin: 1 auto; /* This will center the form horizontally */
         }
-
+        a.register {
+   
+    text-decoration: none; /* Remove underline from anchor tags */
+    font-size: 15px; /* Set the font size */
+    color: #124ad7; /* Set the text color */
+        }
        
     </style>
     
@@ -83,7 +88,7 @@
             <br>
             <div>
                 <small class="text-muted ml-2">
-                    <a href="{{url_for('register')}}">No account yet? Register now</a>
+                    <a class = "register" href="{{url_for('register')}}">No account? Create account</a>
                 </small>
             </div>
             

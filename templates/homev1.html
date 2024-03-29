@@ -5,25 +5,65 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Home</title>
         <style>  nav {
-                background-color: #333; /* Background color of the navigation bar */
-                color: #fff; /* Text color of the navigation links */
-                padding: 10px; /* Padding around the navigation links */
+            background-color: #333; /* Background color of the navigation bar */
+            color: #fff; /* Text color of the navigation links */
+            padding: 10px; /* Padding around the navigation links */
+            display: flex; /* Use flexbox for layout */
+            justify-content: flex-start; /* Space items evenly along the main axis */
+            align-items: center; /* Center items along the cross axis */
+        }
+        ul {
+            list-style-type: none; /* Remove bullet points from the list */
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+        }
+           
+        li {
+            display: inline; /* Display list items horizontally */
+            margin-right: 20px; /* Add spacing between navigation links */
+        }
+        li.title-nav {
+                    font-family: Arial, sans-serif; /* Set the font family */
+                    font-size: 25px; /* Set the font size */
+                    font-weight: None; /* Set the font weight */         
+                    
+            }   
+            body {
+                margin: 0;
             }
-            ul {
-                list-style-type: none; /* Remove bullet points from the list */
-                margin: 0; /* Remove default margin */
-                padding: 0; /* Remove default padding */
-            }
+           
             li {
                 display: inline; /* Display list items horizontally */
                 margin-right: 20px; /* Add spacing between navigation links */
+         
             }
-             li.register {
-            float: right; /* Float the "Math" list item to the right */
+            li.electronics {
+            position: relative;
+            top: -3px;
         }
-        li.login {
-            float: right; /* Float the "Math" list item to the right */
+        li.math {
+            position: relative;
+            top: -3px;
         }
+        li.geas {
+            position: relative;
+            top: -3px;
+        }
+        li.communications {
+            position: relative;
+            top: -3px;
+        }
+
+            li.register {
+                margin-left: 660px; 
+                position: relative;
+                top: -3px
+            }
+            li.login {
+                position: relative;
+                top: -3px
+            }
+          
             a {
                 color: #fff; /* Text color of the navigation links */
                 text-decoration: none; /* Remove underline from links */
@@ -31,18 +71,18 @@
     
 </head>
 <body>
-<h1>ECEbix</h1>
+
 
 <nav>
         <ul>
-            <li><a href = "{{url_for('electronics')}}">Electronics</a></li>
-            <li><a href = "{{url_for('electronics')}}">Communications</a></li>
-            <li><a href = "{{url_for('electronics')}}">GEAS</a></li>
-            <li><a href = "{{url_for('electronics')}}">Math</a></li>
+            <li class="title-nav">ECEbix</li>
+            <li class="electronics"><a href = "{{url_for('electronics')}}">Electronics</a></li>
+            <li class="communications"><a href = "{{url_for('electronics')}}">Communications</a></li>
+            <li class="geas"><a href = "{{url_for('electronics')}}">GEAS</a></li>
+            <li class="math"><a href = "{{url_for('electronics')}}">Math</a></li>
             <li class="register"><a href = "{{url_for('register')}}">Register</a></li>
             <li class="login"><a href = "{{url_for('login')}}">Login</a></li>
         </ul>
-
 
     </nav>
 </body>

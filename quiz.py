@@ -70,7 +70,6 @@ class Options(db.Model):
 
 
 
-#----- Creating a Quiz Form ------#
 class QuizForm(FlaskForm):
     user_id = HiddenField()
 

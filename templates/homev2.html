@@ -5,39 +5,70 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Home</title>
         <style>  nav {
-                background-color: #333; /* Background color of the navigation bar */
-                color: #fff; /* Text color of the navigation links */
-                padding: 10px; /* Padding around the navigation links */
-            }
-            ul {
-                list-style-type: none; /* Remove bullet points from the list */
-                margin: 0; /* Remove default margin */
-                padding: 0; /* Remove default padding */
-            }
-            li {
-                display: inline; /* Display list items horizontally */
-                margin-right: 20px; /* Add spacing between navigation links */
-            }
-            
-        li.login {
-            float: right; /* Float the "Math" list item to the right */
+            background-color: #333; /* Background color of the navigation bar */
+            color: #fff; /* Text color of the navigation links */
+            padding: 10px; /* Padding around the navigation links */
+     
         }
-            a {
-                color: #fff; /* Text color of the navigation links */
-                text-decoration: none; /* Remove underline from links */
-            }</style>
+        
+        ul {
+            list-style-type: none; /* Remove bullet points from the list */
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+        }
+        
+        li {
+            display: inline; /* Display list items horizontally */
+            margin-right: 20px; /* Add spacing between navigation links */
+        }
+        
+        li.electronics {
+            position: relative;
+            top: -3px;
+        }
+        li.math {
+            position: relative;
+            top: -3px;
+        }
+        li.geas {
+            position: relative;
+            top: -3px;
+        }
+        li.communications {
+            position: relative;
+            top: -3px;
+        }
+        li.logout {
+            margin: 0 0 0 730px;
+            position: relative;
+            top: -3px
+        }
+        
+        li.Title {
+            font-family: Arial, sans-serif; /* Set the font family */
+            font-size: 25px; /* Set the font size */
+            font-weight: None; /* Set the font weight */
+        }
+        body {
+                margin: 0;
+            }
+        
+        a {
+            color: #fff; /* Text color of the navigation links */
+            text-decoration: none; /* Remove underline from links */
+        }</style>
     
 </head>
 <body>
-<h1>ECEbix</h1>
 
 <nav>
         <ul>
-            <li><a href = "{{url_for('electronics')}}">Electronics</a></li>
-            <li><a href = "{{url_for('electronics')}}">Communications</a></li>
-            <li><a href = "{{url_for('electronics')}}">GEAS</a></li>
-            <li><a href = "{{url_for('electronics')}}">Math</a></li>
-            <li class="login"><a href = "{{url_for('logout')}}">Logout</a></li>
+            <li class="Title">ECEbix</li>
+            <li class="electronics"><a href = "{{url_for('electronics')}}">Electronics</a></li>
+            <li class="communications"><a href = "{{url_for('electronics')}}">Communications</a></li>
+            <li class="geas"><a href = "{{url_for('electronics')}}">GEAS</a></li>
+            <li class="math"><a href = "{{url_for('electronics')}}">Math</a></li>
+            <li class="logout"><a href = "{{url_for('logout')}}">Logout</a></li>
         </ul>
 
 
