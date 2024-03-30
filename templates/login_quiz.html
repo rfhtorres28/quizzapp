@@ -19,25 +19,58 @@
    
     text-decoration: none; /* Remove underline from anchor tags */
     font-size: 15px; /* Set the font size */
-    color: #124ad7; /* Set the text color */
+    color: #121cd7; /* Set the text color */
+    margin: 10px 0 0 0;
         }
+        p.error-message {
+            color: #e21313;
+            margin: 5px -3px 4px -5px;
+        }
+        div.login-btn{
+            margin-bottom: 10px;
+        }
+        div.container {
+            width: 32%; /* Adjust the width as needed */
+            margin: 0 auto; /* Center the container horizontally */
+            margin-top: 50px;
+            border: 1px solid #ccc; /* Add a border for the rectangle effect */
+            padding: 20px; /* Add padding for spacing inside the container */
+            box-sizing: border-box; /* Include padding and border in the width */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+      h1.login-header{
+        color: #124a83;
+        margin-left: 13px;
+        margin-bottom: 10px;
+        font-weight: normal;
+        font-size: 27px;
+      }
+      div.image-heading-container{
        
+       display: flex; /* Use flexbox to arrange items horizontally */
+       align-items: center; /* Center items vertically */
+       }
+       img.centered-image {
+    margin-left: 20px; /* Center the image horizontally */
+        }
+    fieldset.form-group{
+        margin-left: 10px;
+        width: 100%;
+    }
     </style>
     
 </head>
 
 <body>
 
-    <h1>Login your account</h1>
-    {% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul>
-      {% for message in messages %}
-          {{ message }}
-      {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
+    
+    <div class="container">
+      
+        <div class="image-heading-container">
+            <img src="static\logo.png" alt="Example Image" width="100" height="100">
+            <h1 class="login-header">Login an Account</h1>
+        </div>
+       
     <div class="content-section">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
@@ -82,14 +115,20 @@
 
             </fieldset>
             <br>
-            <div class="form-group">
+            <div class="login-btn">
                 {{ form.submit(class="btn btn-outline-info") }}
             </div>
-            <br>
+      
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <p class="error-message">{{ messages[0] }}</p>    
+            {% endif %}
+          {% endwith %}
+            
             <div>
-                <small class="text-muted ml-2">
-                    <a class = "register" href="{{url_for('register')}}">No account? Create account</a>
-                </small>
+               
+                <a class = "register" href="{{url_for('register')}}">No account? Create account</a>
+               
             </div>
             
            
@@ -97,7 +136,7 @@
 
      
     </div>
-    
+</div>
     
 
 </body>

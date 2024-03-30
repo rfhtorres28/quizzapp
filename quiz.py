@@ -40,12 +40,11 @@ class UserDetails(db.Model, UserMixin):
     password = db.Column(db.String(255), unique = True, nullable = False)
 
 
-    def __init__ (self, username, email, password):
+    def __repr__(self):
 
-       
-        self.username = username
-        self.email = email
-        self.password = password
+        return f"User('{self.username}', '{self.email}', '{self.password}')"
+
+
 
 class Question(db.Model):
 
@@ -53,6 +52,10 @@ class Question(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(255), nullable=False)
     options = db.relationship('Options', backref='questions', lazy=True)
+
+    def __repr__(self):
+
+        return f"Question('{self.content}', '{self.options}')"
 
 
 
@@ -65,7 +68,9 @@ class Options(db.Model):
     content = db.Column(db.String(255), nullable=False)
     is_correct = db.Column(db.Boolean, nullable=False)
 
+    def __repr__(self):
 
+        return f"Options('{self.letter}', '{self.content}', '{self.is_correct}')"
 
 
 
@@ -108,6 +113,10 @@ class RegistrationForm(FlaskForm):
         if user:
             raise ValidationError('Username already exists. Please choose other username')
         
+        elif len(username.data) > 10:
+            flash('Username has a limit of 10 characters only', 'error')
+            raise ValidationError('Username exceeds maximum limit of 10 characters only')
+        
 
     def validate_email(self, email):
         print("Validating username:", email)
@@ -118,6 +127,7 @@ class RegistrationForm(FlaskForm):
 
 
 
+
 #----- Creating the Login Form ------#
 class LoginForm(FlaskForm):
     email = StringField('Email',
@@ -125,6 +135,14 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
+
+    
+          
+
+
+
+
+
 
 
 #----- Initializing Login Manager ------#
@@ -178,8 +196,9 @@ def login():
         
 
         else:
-            flash('Login Unsuccessful, Please Try again', 'error')
+            flash('Login unsuccesful, Please try again')
             return redirect(url_for('login'))
+        
     
     return render_template('login_quiz.html', form=form, messages=messages)
 
