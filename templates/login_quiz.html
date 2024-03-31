@@ -26,24 +26,25 @@
             color: #e21313;
             margin: 5px -3px 4px -5px;
         }
-        div.login-btn{
-            margin-bottom: 10px;
-        }
+      
         div.container {
-            width: 32%; /* Adjust the width as needed */
+            width: 35%; /* Adjust the width as needed */
             margin: 0 auto; /* Center the container horizontally */
             margin-top: 50px;
-            border: 1px solid #ccc; /* Add a border for the rectangle effect */
+            border: 1px solid #ffffff; /* Add a border for the rectangle effect */
             padding: 20px; /* Add padding for spacing inside the container */
             box-sizing: border-box; /* Include padding and border in the width */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            background-color: #ffffff;
+         
         }
       h1.login-header{
         color: #124a83;
-        margin-left: 13px;
+        margin-left: 40px;
         margin-bottom: 10px;
         font-weight: normal;
         font-size: 27px;
+        
       }
       div.image-heading-container{
        
@@ -55,8 +56,30 @@
         }
     fieldset.form-group{
         margin-left: 10px;
-        width: 100%;
+        width: 115%;
     }
+    div.form-email{
+        width: 100%;
+        
+    }
+    div.login-btn {
+        float: right;
+        margin-right:-80px;
+
+    }
+    a.register{
+      margin-left: 10px;
+    
+    }
+    .logo {
+            margin: 0 auto;
+            width: 210px;
+            height: 120px; 
+        }
+    .border-bottom{
+        font-size: 20px;
+    }
+   
     </style>
     
 </head>
@@ -67,18 +90,16 @@
     <div class="container">
       
         <div class="image-heading-container">
-            <img src="static\logo.png" alt="Example Image" width="100" height="100">
-            <h1 class="login-header">Login an Account</h1>
+            <img src="static\logo.png" alt="Example Image" width="100" height="100" class="logo">
         </div>
        
     <div class="content-section">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Login</legend>
-                <div class="form-group">
+                <legend class="border-bottom">Login your account</legend>
+                <div class="form-email">
                     {{ form.email.label(class="form-control-label") }}
-
                     {% if form.email.errors %}
                     {{ form.email(class="form-control form-control-lg is-invalid") }}
                     <div class = "invalid-feedback">
@@ -90,9 +111,8 @@
                         {{ form.email(class="form-control form-control-lg") }} 
                     {%endif %}
         
-                </div>
-                <br>
-                <div class="form-group">
+                </div><br>
+                <div class="form-password">
                     {{ form.password.label(class="form-control-label") }}
 
                     {% if form.password.errors %}
@@ -127,7 +147,7 @@
             
             <div>
                
-                <a class = "register" href="{{url_for('register')}}">No account? Create account</a>
+                <a class = "register" href="{{url_for('register')}}">Create an account</a>
                
             </div>
             

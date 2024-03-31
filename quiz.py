@@ -82,7 +82,7 @@ def create_dynamic_fields(questions):
     
     for i, question in enumerate(questions, start=1):
         choices = [(option['letter'], option['content']) for option in question['options']]
-        field_name = f'q{i}'
+        field_name = f'Question {i}.'
         field_label = question['content']
         setattr(QuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
 
@@ -159,7 +159,12 @@ def load_user(user_id):
 #----- Creating the endpoint routes ------#
 @app.route('/home', methods=['GET'])
 def home():
-    return render_template('homev1.html')
+
+    if current_user.is_authenticated:
+        return redirect(url_for('account'))
+    
+    else:
+         return render_template('home.html')
 
 
 
@@ -192,7 +197,7 @@ def login():
         user = UserDetails.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user) # Get the state of the user that is currently login, so it means that if a user logs in, it is stored in the login_user()
-            return redirect(url_for('courses'))
+            return redirect(url_for('account'))
         
 
         else:
@@ -204,9 +209,13 @@ def login():
 
 
 
-@app.route("/courses")
-def courses():
-    return render_template('homev2.html')
+
+@app.route("/account")
+@login_required
+def account():
+    return render_template('account.html')
+
+
 
 
 @app.route("/logout")
@@ -249,10 +258,10 @@ class Electronics(Resource):
                 form_data = request.form.to_dict()  
     
             for question in ece_questions: 
-                user_response = form_data.get(f'q{question["id"]}') 
+                user_response = form_data.get(f'Question {question["id"]}.') 
                 correct_response = [x for x in question['options'] if x['is_correct']==True] 
                 correct_answers.append(correct_response) 
-                user_responses[f'q{question["id"]}'] = user_response
+                user_responses[f'Question {question["id"]}'] = user_response
                 if user_response == correct_response[0]["letter"]:
                     no_correct_answer += 1
 
@@ -261,16 +270,16 @@ class Electronics(Resource):
             score_percentage = round(score_percentage, 2)
          
             return make_response(render_template('result1.html', form=form, score_percentage=score_percentage,
-                                  no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers))
+                   no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers))
    
    
        
 
 
-api.add_resource(Electronics, '/courses/electronics')
+api.add_resource(Electronics, '/electronics')
 
 
-@app.route('/courses/electronics/answers')
+@app.route('/electronics/answers')
 @login_required #Safety feature so that user that is not authenticated cant access the correct answers
 def answers():
     correct_answers = []

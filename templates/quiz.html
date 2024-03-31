@@ -7,66 +7,124 @@
     <link rel="stylesheet" href="static/main.css">
 
     <style>
-        body, h1, h2, ol, form, p, label {
-            margin: 5px;
-            padding-left: 6px;
+ 
+      nav {
+        background-color: #333; /* Background color of the navigation bar */
+            color: #fff; /* Text color of the navigation links */
+            padding: 10px; /* Padding around the navigation links */
+            display: flex; /* Use flexbox for layout */
+            justify-content: flex-start; /* Space items evenly along the main axis */
+            align-items: center; /* Center items along the cross axis */
         }
+        ul {
+            list-style-type: none; /* Remove bullet points from the list */
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+        }
+           
+        li {
+            display: inline; /* Display list items horizontally */
+            margin-right: 30px; /* Add spacing between navigation links */
+        }
+        li.title {
+            font-family: Arial, sans-serif; /* Set the font family */
+            font-size: 25px; /* Set the font size */
+            font-weight: None; /* Set the font weight */         
+        }   
+        body {
+            margin: 0;
+        }               
+        li.back-to-home {
+            font-size: 16px;
+            position: relative;
+            top: -3px
+        }
+        li.logout  {
+                font-size: 16px;
+                position: relative;
+                top: -3px;
+                left: 1000px;
+        }
+        a {
+            color:#fff;
+            text-decoration: none;
+        }
+      h1.course{
+        position: relative;
+        left: 25px;
+
+      }
+      h2.instructions{
+        position: relative;
+        left: 25px;
        
+      }
+      div.content-section{
+        position: relative;
+        left: -15px;
+        top: 15px;
+      }
+      button.submit{
+        position: relative;
+        left: 40px;
+      }
+
     </style>
     
 </head>
 
 <body>
-    <div class="border-top pt-3">
-        <small class="text-muted">
-         <a class="ml-2" href="{{ url_for('logout') }}">Log out</a>
-        </small>
-    </div>
-    <div class="border-top pt-3">
-        <small class="text-muted">
-         <a class="ml-2" href="{{ url_for('home') }}">Home</a>
-        </small>
-    </div>
-    <h1>Electronics</h1>
-    <h2>Choose the best answer among the choices</h2>
-    <br>
-    <form action="/courses/electronics" method="post">
-        {{ form.csrf_token }}
-        <input type="hidden" name="user_id" value="{{ session.user_id }}">
-        <ol type = "1">
+    <nav>
+        <ul>
+      
+            <li class="title">ECEBix</li>
+            <li class="back-to-home"><a href = "{{url_for('home')}}">Home</a></li>
+            <li class="logout"><a href = "{{url_for('logout')}}">Logout</a></li>
            
-            {% for field in form %}
-            {% if field.name not in ['csrf_token', 'user_id'] %}
-        
-            <li>
-            
-            <p>{{ field.label.text}}</p>
-            {% for option in field.choices %}
-                    <label>
-                        <input type="radio" name="{{field.id}}" value="{{ option[0]}}"> <!-- This is for user input letter choice, the field.id is automatically generated -->
+        </ul>
+     
 
-                        {{ option[1] }} <!-- This is to display the content of the choices (access the content of the tuple in the question forms)-->
-                    </label><br>
-            {% endfor %}
-                {% if field.errors %}
-                <div class="invalid-feedback">
-                     {% for error in field.errors %}
-                        <span>{{ error }}</span><br>
-                     {% endfor %}
-                </div>
-                {% endif %}
-        
-            </li> 
-            {% endif %}
-            {% endfor %}
+    </nav>
             
-        </ol>
-         
-       
-        <br>
-        <button type="submit">Submit Answers</button>
-    </form>
+            <h1 class="course">Electronics</h1>
+            <h2 class="instructions">Choose the best answer among the choices</h2>
+                   
+            
     
-
+            <div class="content-section">
+            <form action="/electronics" method="post">
+                     {{ form.csrf_token }}
+                     <input type="hidden" name="user_id" value="{{ session.user_id }}">
+                     <ol type="1">
+           
+                     {% for field in form %}
+                     {% if field.name not in ['csrf_token', 'user_id'] %}
+        
+                    <p>
+            
+                             <p>{{field.id}} {{ field.label.text}}</p>
+                     {% for option in field.choices %}
+                         <label>
+                                 <input type="radio" name="{{field.id}}" value="{{ option[0]}}"> <!-- This is for user input letter choice, the field.id is automatically generated -->
+                                       {{ option[1] }} <!-- This is to display the content of the choices (access the content of the tuple in the question forms)-->
+                        </label><br>
+                      {% endfor %}
+                      {% if field.errors %}
+                     <div class="invalid-feedback">
+                             {% for error in field.errors %}
+                                 <span>{{ error }}</span><br>
+                             {% endfor %}
+                     </div>
+                     {% endif %}
+        
+                    </p>
+                      {% endif %}
+                     {% endfor %}
+            
+                     </ol> <br>
+                     <button type="submit" class="submit">Submit Answers</button>
+                </form>
+                </div>
+    
 </body>
 </html>

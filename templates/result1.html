@@ -5,28 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Results</title>
     <link rel="stylesheet" href="static/main.css">
-
     <style>
-        body, h1, h2, ol, form, p, label {
-            margin: 5px;
-            padding-left: 6px;
+ 
+        nav {
+          background-color: #333; /* Background color of the navigation bar */
+              color: #fff; /* Text color of the navigation links */
+              padding: 10px; /* Padding around the navigation links */
+              display: flex; /* Use flexbox for layout */
+              justify-content: flex-start; /* Space items evenly along the main axis */
+              align-items: center; /* Center items along the cross axis */
+          }
+          ul {
+              list-style-type: none; /* Remove bullet points from the list */
+              margin: 0; /* Remove default margin */
+              padding: 0; /* Remove default padding */
+          }
+             
+          li {
+              display: inline; /* Display list items horizontally */
+              margin-right: 30px; /* Add spacing between navigation links */
+          }
+          li.title {
+              font-family: Arial, sans-serif; /* Set the font family */
+              font-size: 25px; /* Set the font size */
+              font-weight: None; /* Set the font weight */         
+          }   
+          body {
+              margin: 0;
+          }               
+          li.back-to-home {
+              font-size: 16px;
+              position: relative;
+              top: -3px
+          }
+          li.logout  {
+                  font-size: 16px;
+                  position: relative;
+                  top: -3px;
+                  left: 1000px;
+          }
+          a {
+              color:#fff;
+              text-decoration: none;
+          }
+        h1.course{
+          position: relative;
+          left: 25px;
+  
         }
-    </style>
+        h2.instructions{
+          position: relative;
+          left: 25px;
+         
+        }
+        div.section{
+          position: relative;
+          left: -15px;
+          top: 10px;
+        }
+        button.submit{
+          position: relative;
+          left: 40px;
+        }
+        h1.result{
+        position: relative;
+        left: 25px;
+        font-size: 25px;
+        color: red;
+        font-weight: normal;
+
+      }
+    
+      button.restart-test{
+        position: relative;
+        left: 25px;
+      }
+      button.correct-answer{
+        position: relative;
+        left: 25px;
+      }
+      div.invalid-feedback{
+        color:red
+      }
+      
+      </style>
+    
 </head>
 
 <body>
-    <h1>Quiz Results</h1>
-    <h2>Summary</h2>
-    <div class="border-top pt-3">
-        <small class="text-muted">
-         <a class="ml-2" href="{{ url_for('logout') }}">Log out</a>
-        </small>
-    </div>
-    <ol type="1">
+    <nav>
+        <ul>
+      
+            <li class="title">ECEBix</li>
+            <li class="back-to-home"><a href = "{{url_for('home')}}">Home</a></li>
+            <li class="logout"><a href = "{{url_for('logout')}}">Logout</a></li>
+           
+        </ul>
+
+    </nav>
+    <h1 class="result">Your score is {{no_correct_answer}} out of {{total_questions}}, {{score_percentage}}%</h1>
+  
+   <div class="section">
+   <ol type="1">
         {% for field in form %}
             {% if field.name not in ['csrf_token', 'user_id'] %}
-                <li>
-                    <p>{{ field.label.text }}</p>
+                <p>
+                    <p>{{field.id}} {{ field.label.text }}</p>
                     {% for option in field.choices %}
                         <label>
                             <input type="radio" name="{{ field.id }}" value="{{ option[0] }}" {% if option[0] == field.data %} checked{% endif %} disabled> <!-- "checked" attribute is used when making a radio button selected by default -->
@@ -36,24 +120,19 @@
                     {% if field.errors %}
                         <div class="invalid-feedback">
                             {% for error in field.errors %}
-                                <span>{{ error }}</span><br>
+                               <p> <span>{{ error }}</span></p>
                             {% endfor %}
                         </div>
                     {% endif %}
-                    {% for correct_answer in correct_answers %}
-                            
-                            {%if correct_answer[0]['question_id'] == field.id %}
-                                <p>Correct Answer: {{correct_answer[0]['content']}}</p>
-                            {%endif%}
-                    {%endfor%}
-                      <!-- field.data contains the submitted answer of the user -->
-                </li>
+                </p>
             {% endif %}
         {% endfor %}
     </ol>
-    <p>Score: {{no_correct_answer}} out of {{total_questions}}, {{score_percentage}}%</p>
+    </div>
+    
+    
     <br>
-    <button type="button" onclick="window.location.href = '{{url_for('electronics')}}';">Restart the Test</button>
-    <button type="button" onclick="window.location.href = '{{url_for('answers')}}';">Correct Answers</button>
+    <button type="button" onclick="window.location.href = '{{url_for('electronics')}}';" class="restart-test">Restart the Test</button>
+   <p> <button type="button" onclick="window.location.href = '{{url_for('answers')}}';" class="correct-answer">Correct Answers</button></p>
 </body>
 </html>
