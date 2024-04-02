@@ -7,6 +7,7 @@ from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitF
 from wtforms.validators import InputRequired, DataRequired, Length, Email, EqualTo, ValidationError
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from email_validator import validate_email, EmailNotValidError
 
 
 #-----Initializing the flask app-------#
@@ -147,9 +148,6 @@ class LoginForm(FlaskForm):
 
 
 
-
-
-
 #----- Initializing Login Manager ------#
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -206,7 +204,7 @@ def login():
         
 
         else:
-            flash('Login unsuccesful, Please try again')
+            flash('User not found, Please try again')
             return redirect(url_for('login'))
         
     
@@ -231,30 +229,88 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+def email_validator(email):
+    try:
+        validate_email(email)
+        return True
+    except EmailNotValidError:
+        return False
 
 @app.route("/edit_information", methods=['GET', 'POST'])
 def edit_information():
+    error_message_firstname = ''
+    error_message_lastname = ''
+    error_message_username = ''
+    error_message_email = ''
+
+
     if request.method == 'POST':
       firstname = request.form['firstname']
       lastname = request.form['lastname']
       username = request.form['username']
       email = request.form['email']
+      error_flag = 0
 
-      user = UserDetails.query.filter_by(username=username).first()
+      user = UserDetails.query.filter_by(username=current_user.username).first()
+
       if user:
-           user.firstname = firstname
-           user.lastname = lastname
-           user.username = username
-           user.email = email
-           db.session.commit()
+          if len(firstname) > 20:
+                flash('Firstname must be at least 20 characters')
+                error_flag = error_flag + 1
+          else:
+                user.firstname = firstname
+         
+          if len(lastname) > 20:
+                error_message_lastname = 'Lastname must be at least 20 characters'
+                error_flag = error_flag + 1
+          else:
+                user.lastname = lastname
 
-           flash('Your account has been sucessfully updated', 'success')
-           return redirect(url_for('account'))
+          if len(username) > 10:
+                error_message_username = 'Username must be at least 10 characters'
+                error_flag = error_flag + 1
+          else:
+                user.username= username
 
+          if email_validator(email):
+              user.email = email
+          
+          else: 
+              error_message_email = 'Username must be at least 10 characters'
+              error_flag = error_flag + 1
+              flash('Invalid email format')
+
+      db.session.commit()
+
+      if error_flag > 0: #Check if there are any error exist
+             
+          return redirect(url_for('edit_information'))
+      
       else:
-           return "User not found"
+          return redirect(url_for('account'))
+
 
     return render_template("edit_info.html")    
+
+
+@app.route('/edit_password', methods=['GET', 'POST'])
+def edit_password():
+
+    if request.method == 'POST':
+        
+        user = UserDetails.query.filter_by(username=current_user.username).first()
+        if user and bcrypt.check_password_hash(user.password, request.form['old_password']):
+            hashed_new_password = bcrypt.generate_password_hash(request.form['new_password']).decode('utf-8')
+            user.password = hashed_new_password
+            db.session.commit()
+            return redirect(url_for('account'))
+        else:
+            flash('Old password incorrect. Please try again')
+
+        
+
+
+    return render_template("edit_password.html")
 
 
 
