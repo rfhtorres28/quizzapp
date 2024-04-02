@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Information</title>
+    <style>
+        .content-section{
+            width: 35%; /* Adjust the width as needed */
+            margin: 0 auto; /* Center the container horizontally */
+            margin-top: 50px;
+            border: 1px solid #ffffff; /* Add a border for the rectangle effect */
+            padding: 20px; /* Add padding for spacing inside the container */
+            box-sizing: border-box; /* Include padding and border in the width */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            background-color: #ffffff;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .form-group label {
+          
+            width: 100px; /* Fixed width for labels */
+            text-align: left; /* Align labels to the right */
+            margin-right: -5px; /* Adjust as needed */
+        }
+        .form-group .form-field {
+            margin-left: 15px;
+        }
+        .form-field {
+            width: calc(100% - 100px);
+            box-sizing: border-box;
+            padding: 5px;
+        }
+        .content-section h1 {
+            display: flex;
+            justify-content: center;
+            margin-top: -10px;
+            font-weight: normal;
+            font-size: 25px;
+        }
+        div.image-heading-container{
+       
+            display: flex; /* Use flexbox to arrange items horizontally */
+            justify-content: center; /* Center items vertically */
+       }
+       .content-section .image-heading-container img {
+            width: 210px;
+            height: 120px;
+       }
+       .content-section form .button-container {
+        display: flex;
+        justify-content: flex-end;
+       }
+       .content-section form .button-container button{
+        margin-left: 10px;
+       }
+      
+    </style>
+</head>
+<body>
+
+    <div class="content-section">
+        <div class="image-heading-container">
+            <img src="static\logo.png" alt="Example Image">
+        </div>
+      <form action="{{url_for('edit_information')}}" method="post">
+            <h1>Edit Information</h1>
+             <div class="form-group">
+                    <label for="firstname">First Name</label>
+                    <input type="text" id="firstname" name="firstname" required class="form-field">
+             </div><br>
+             <div class="form-group">
+                <label for="lastname">Last Name</label>
+                <input type="text" id="lastname" name="lastname" required class="form-field">
+             </div><br>
+             <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required class="form-field">
+             </div><br>
+             <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email" required class="form-field">
+             </div><br>
+             <div class="button-container">
+                    <button type="submit">Save</button>
+                    <button type="submit" onclick="window.location.href = '{{url_for('account')}}';">Cancel</button>
+            </div>
+       </form>
+    </div>
+
+</body>
+</html>
+

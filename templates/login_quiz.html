@@ -140,10 +140,10 @@
             </div>
       
             {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <p class="error-message">{{ messages[0] }}</p>    
-            {% endif %}
-          {% endwith %}
+                 {% if messages %}
+                         <p class="error-message">{{ messages[0] }}</p>    
+                 {% endif %}
+            {% endwith %}
             
             <div>
                

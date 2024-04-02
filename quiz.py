@@ -23,7 +23,7 @@ username='root'
 password= 'Toootsie@1430'
 port = '3306'
 host = 'localhost'
-database_name= 'quiz'
+database_name= 'quizapp'
 
 
 #-----Initializing the Database-------#
@@ -34,8 +34,13 @@ db = SQLAlchemy(app)
 
 class UserDetails(db.Model, UserMixin):
 
+    __tablename__ = 'userdetails'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(10), unique = True, nullable = False) 
+    firstname = db.Column(db.String(20), unique = True, nullable = False) 
+    lastname = db.Column(db.String(20), unique = True, nullable = False) 
+    bio = db.Column(db.String(255), unique = True, nullable = True) 
+    image_file = db.Column(db.String(20), nullable=False, default='default.png')
     email = db.Column(db.String(50), unique = True, nullable = False)
     password = db.Column(db.String(255), unique = True, nullable = False)
 
@@ -95,16 +100,17 @@ ece_questions = [{"id":question.id, "content":question.content,
 create_dynamic_fields(ece_questions)
 
 
-
 #----- Creating the Registration Form ------#
 class RegistrationForm(FlaskForm):
     
+    firstname = StringField('Firstname', validators=[DataRequired(), Length(min=2, max=20)])
+    lastname = StringField('Lastname', validators=[DataRequired(), Length(min=2, max=20)])
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match')])
     submit = SubmitField('Sign Up')
-
+    
     
     def validate_username(self, username):
         print("Validating username:", username)
@@ -130,8 +136,7 @@ class RegistrationForm(FlaskForm):
 
 #----- Creating the Login Form ------#
 class LoginForm(FlaskForm):
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
@@ -175,7 +180,7 @@ def register():
     if request.method == 'POST':
         if form.validate_on_submit():
           hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-          user = UserDetails(username=form.username.data, email=form.email.data, password=hashed_password)
+          user = UserDetails(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data, email=form.email.data, password=hashed_password)
           db.session.add(user)
           db.session.commit()
           flash('Your account has been sucessfully created! You may now login', 'success')
@@ -213,7 +218,10 @@ def login():
 @app.route("/account")
 @login_required
 def account():
-    return render_template('account.html')
+    
+    present_user = current_user.firstname + ' ' + current_user.lastname
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template('account.html', image_file=image_file, present_user=present_user)
 
 
 
@@ -222,6 +230,32 @@ def account():
 def logout():
     logout_user()
     return redirect(url_for('home'))
+
+
+@app.route("/edit_information", methods=['GET', 'POST'])
+def edit_information():
+    if request.method == 'POST':
+      firstname = request.form['firstname']
+      lastname = request.form['lastname']
+      username = request.form['username']
+      email = request.form['email']
+
+      user = UserDetails.query.filter_by(username=username).first()
+      if user:
+           user.firstname = firstname
+           user.lastname = lastname
+           user.username = username
+           user.email = email
+           db.session.commit()
+
+           flash('Your account has been sucessfully updated', 'success')
+           return redirect(url_for('account'))
+
+      else:
+           return "User not found"
+
+    return render_template("edit_info.html")    
+
 
 
 

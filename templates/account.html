@@ -20,7 +20,7 @@
         
            li {
             display: inline; /* Display list items horizontally */
-            margin-right: 5px; /* Add spacing between navigation links */
+            margin-right: -5px; /* Add spacing between navigation links */
            }
         
           .menu .electronics {
@@ -125,9 +125,27 @@
             margin-top: 20px;
 
         }
-       
-
-        
+        .user-section .user_profile_image{
+            margin-left: 20px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+            width: 170px;
+            height: 150px;
+         
+        }
+        .user-section{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            float: left;
+            margin-left: 30px;
+            margin-top: 10px;
+        }
+        .user-section .present_user{
+            margin-left: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
         </style>
       
     
@@ -136,7 +154,7 @@
 
 <nav>
         <ul class="menu">
-            <img src="static\electron_logo.png" alt="Example Image" class="logo">
+            <img src="static\logo.png" alt="Example Image" class="logo">
             <li class="electronics"><a href = "{{url_for('electronics')}}">Electronics</a></li>
             <li class="communications"><a href = "{{url_for('electronics')}}">Communications</a></li>
             <li class="geas"><a href = "{{url_for('electronics')}}">GEAS</a></li>
@@ -146,12 +164,24 @@
        <div class="dropdown">
             <button>Account &#9660;</button>
             <div class="content">
-                <a href="#">Edit Information</a>
+                <a href="{{url_for('edit_information')}}">Edit Information</a>
                 <a href="{{url_for('logout')}}">Logout</a>
             </div>
        </div>
         
     </nav>
+
+    <br>
+    <div class="user-section">
+        <img src="{{image_file}}" alt="Example Image" class="user_profile_image">
+        <p class="present_user">{{present_user}}</p>
+       
+    </div>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+            <p class="error-message">{{ messages[0] }}</p>    
+    {% endif %}
+    {% endwith %}
    
   
 </body>
