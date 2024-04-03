@@ -3,7 +3,7 @@ from flask_restful import Api, Resource
 from flask_bcrypt import Bcrypt 
 from flask_login import current_user, LoginManager, login_user, logout_user, login_required 
 from flask_wtf import FlaskForm
-from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitField, BooleanField
+from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitField, BooleanField, DateField
 from wtforms.validators import InputRequired, DataRequired, Length, Email, EqualTo, ValidationError
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -33,6 +33,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{username}:{password}@
 db = SQLAlchemy(app)
 
 
+
 class UserDetails(db.Model, UserMixin):
 
     __tablename__ = 'userdetails'
@@ -40,11 +41,13 @@ class UserDetails(db.Model, UserMixin):
     username = db.Column(db.String(10), unique = True, nullable = False) 
     firstname = db.Column(db.String(20), unique = True, nullable = False) 
     lastname = db.Column(db.String(20), unique = True, nullable = False) 
-    bio = db.Column(db.String(255), unique = True, nullable = True) 
     image_file = db.Column(db.String(20), nullable=False, default='default.png')
     email = db.Column(db.String(50), unique = True, nullable = False)
     password = db.Column(db.String(255), unique = True, nullable = False)
-
+    date_of_birth = db.Column(db.Date, nullable=True)
+    gender = db.Column(db.String(10), unique = True, nullable = False)
+    instagram_link = db.Column(db.String(30), unique = True, nullable = False)
+    facebook_link = db.Column(db.String(30), unique = True, nullable = False)
 
     def __repr__(self):
 
@@ -87,18 +90,13 @@ class QuizForm(FlaskForm):
 def create_dynamic_fields(questions):
     
     for i, question in enumerate(questions, start=1):
-        choices = [(option['letter'], option['content']) for option in question['options']]
+        choices = [(option['letter'], option['content']) for option in question['options']] # a list of tuples, elements can be access same as a list
         field_name = f'Question {i}.'
         field_label = question['content']
         setattr(QuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
 
 
-qn = Question.query.all()
-opn = Options.query.all()
-ece_questions = [{"id":question.id, "content":question.content,
-                "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
 
-create_dynamic_fields(ece_questions)
 
 
 #----- Creating the Registration Form ------#
@@ -142,7 +140,16 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
-    
+
+#----- Creating a Profile Form ------#
+class ProfileForm(FlaskForm):
+
+    gender = RadioField('Gender', choices=[('male', 'Male'), ('female', 'Female')])
+    age = StringField('Age', validators=[DataRequired()])
+    instagram_username = StringField('Instagram', validators=[DataRequired()])
+    facebook_username = StringField('Facebook', validators=[DataRequired()])
+    date_of_birth = DateField('Date of Birth')
+    submit = SubmitField('Save')
           
 
 
@@ -177,18 +184,36 @@ def register():
         
     if request.method == 'POST':
         if form.validate_on_submit():
-          hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-          user = UserDetails(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data, email=form.email.data, password=hashed_password)
-          db.session.add(user)
-          db.session.commit()
-          flash('Your account has been sucessfully created! You may now login', 'success')
-        
-          return redirect(url_for('login')) # return here ensures that the url for home page is sent back (return back) to the clients browser
+          return redirect(url_for('profile')) # return here ensures that the url for home page is sent back (return back) to the clients browser
 
 
     
     return render_template('register_quiz.html', form=form)
         
+
+
+
+@app.route('/member-profile', methods=['GET', 'POST'])
+def profile():
+    form = ProfileForm()
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+            user = UserDetails(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data, email=form.email.data, password=hashed_password, date_of_birth=form.date_of_birth, gender=gender, instagram_link=form.instagram_username, facebook_link=form.facebook_username)
+            db.session.add(user)
+            db.session.commit()
+            flash('Your account has been sucessfully created! You may now login', 'success')
+            return jsonify(form.data)
+
+
+    return render_template('user_profile.html', form=form) 
+
+
+
+
+
+
 
 
 @app.route('/member-login', methods=['GET', 'POST'])
@@ -218,8 +243,9 @@ def login():
 def account():
     
     present_user = current_user.firstname + ' ' + current_user.lastname
+    username = current_user.username
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', image_file=image_file, present_user=present_user)
+    return render_template('account.html', image_file=image_file, present_user=present_user, username=username)
 
 
 
@@ -304,8 +330,11 @@ def edit_password():
             user.password = hashed_new_password
             db.session.commit()
             return redirect(url_for('account'))
+        
+
         else:
             flash('Old password incorrect. Please try again')
+            return redirect(url_for('edit_password'))
 
         
 

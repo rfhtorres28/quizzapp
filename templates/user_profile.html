@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+        }
+        .main-section{
+            position:absolute;
+            display: block; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 500px;
+            height: 500px;
+        }
+        .main-section img {
+            position: relative;
+            width: 210px;
+            height: 120px; 
+            top: 30px;   
+        }
+        .main-section form {
+            position: relative; 
+            margin: 0 auto; 
+            width: 400px;
+            height: 300px; 
+            top: 40px;
+            
+        }
+      .form-group {
+        display: flex;
+        align-items: center;
+        list-style: none;
+        margin: 15px;
+    
+      }
+      .main-section button {
+        margin-top: 15px;
+    
+      }
+   
+    </style>
+</head>
+<body>
+    <div class="main-section">
+        <div class="logo">
+            <img src="static\logo.png" alt="Example Image" width="100" height="100" class="logo">
+        </div>
+         <form method="POST" action="">
+            {{form.hidden_tag()}}
+            <fieldset class="field-form">
+                <legend class="legend">Profile Information</legend>
+                    <div class="form-group">
+                        <p>{{form.gender.label}}</p>
+                        {% for option in form.gender.choices %}
+                         <label>
+                                 <input type="radio" name="gender" value="{{ option[0]}}"> <!-- This is for user input letter choice, the field.id is automatically generated -->
+                                       {{ option[1] }} <!-- This is to display the content of the choices (access the content of the tuple in the question forms)-->
+                        </label><br>
+                      {% endfor %}   
+                    </div>
+                    <div class="form-group">
+                       <span>{{ form.date_of_birth.label }} {{ form.date_of_birth }}</span>  
+                    </div>
+                    <div class="form-group">
+                        <span> {{form.instagram_username.label}}{{form.instagram_username}}</span>  
+                    </div>
+                    <div class="form-group">
+                        <span> {{form.facebook_username.label}} {{form.facebook_username}}</span>  
+                    </div>
+            </fieldset>
+            <button type="submit" class="submit">Submit Answers</button>
+         </form>
+        
+    </div>
+</body>
+</html>
