@@ -8,7 +8,7 @@
         .main-section{
             width: 37%; /* Adjust the width as needed */
             margin: 0 auto; /* Center the container horizontally */
-            margin-top: 50px;
+            margin-top: 30px;
             border: 1px solid #ffffff; /* Add a border for the rectangle effect */
             padding: 15px; /* Add padding for spacing inside the container */
             box-sizing: border-box; /* Include padding and border in the width */
@@ -61,10 +61,10 @@
        .main-section legend {
          font-size: 20px;
        }
-       
-      
-      
-      
+       .main-section .gender-field input[type="radio"] {
+          margin-left: 10px;
+          width: 10px;
+        }
     </style>
 </head>
 <body>
@@ -76,25 +76,36 @@
                 <legend>Update Information</legend>
                 <form action="{{url_for('edit_information')}}" method="post">
                   <div>
-                    <label for="firstname">First Name</label>
-                    <input type="text" id="firstname" name="firstname" required class="firstname_field">
-                  </div><br>
+                      <span>{{form.firstname_update.label}} {{form.firstname_update}}</span>
+                  </div><br>     
                   <div>
-                    <label for="lastname">Last Name</label>
-                    <input type="text" id="lastname" name="lastname" required class="lastname_field">
-                  </div><br>
-                  <div>
-                    <label for="username">User Name</label>
-                    <input type="text" id="usernname" name="username" required class="username_field">
-                  </div><br>
-                  <div>
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required class="email_field">
-                  </div><br>
-                  <div class="button-container">
-                    <button type="submit">Save</button>
-                    <button type="submit" onclick="window.location.href = '{{url_for('account')}}';" class="cancel-btn">Cancel</button>
-                  </div>        
+                    <span>{{form.lastname_update.label}} {{form.lastname_update}}</span>
+                </div><br>  
+                <div>
+                  <span>{{form.username_update.label}} {{form.username_update}}</span>
+              </div><br> 
+              <div>
+                <span>{{form.email_update.label}} {{form.email_update}}</span>
+            </div><br>
+            <div>
+            <span>{{form.date_of_birth_update.label}} {{form.date_of_birth_update}}</span>
+            </div><br> 
+            <div class="gender-field">
+              {{form.gender_update.label}}
+              {% for option in form.gender_update.choices %}
+               <label>
+                       <input type="radio" name="gender_update" value="{{ option[0]}}"  {% if option[0] == form.gender_update.data %} checked{% endif %} > <!-- This is for user input letter choice, the field.id is automatically generated -->
+                             {{ option[1] }} <!-- This is to display the content of the choices (access the content of the tuple in the question forms)-->
+              </label>
+               {% endfor %}   
+            </div> 
+            <div>
+              <span>{{form.ig_username_update.label}} {{form.ig_username_update}}</span>
+              </div><br>
+              <div>
+                <span>{{form.fb_username_update.label}} {{form.fb_username_update}}</span>
+                </div><br>
+                {{form.submit}}
                 </form>
             </fieldset>
         </div> 

@@ -99,7 +99,7 @@
         <form method="POST" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom-mb-3">Create an account</legend>
+                <legend class="border-bottom-mb-3">Personal Details</legend>
                 <div class="form-group">
                     {{ form.firstname.label(class="form-control-label") }}
 
@@ -203,11 +203,15 @@
                 <small class="text-muted">
                     <a class="ml-2" href="{{ url_for('login') }}">Already have an account? Click here to login</a>
                 </small>
-                {{ form.submit(class="btn btn-outline-info") }}
-            
+                {{form.submit}}
                
             </div>
         </form>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                <p class="error-message">{{ messages[0] }}</p>    
+        {% endif %}
+         {% endwith %}
 
      
     </div>

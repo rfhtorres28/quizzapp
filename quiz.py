@@ -7,6 +7,7 @@ from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitF
 from wtforms.validators import InputRequired, DataRequired, Length, Email, EqualTo, ValidationError
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_
 from email_validator import validate_email, EmailNotValidError
 
 
@@ -38,16 +39,16 @@ class UserDetails(db.Model, UserMixin):
 
     __tablename__ = 'userdetails'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(10), unique = True, nullable = False) 
-    firstname = db.Column(db.String(20), unique = True, nullable = False) 
-    lastname = db.Column(db.String(20), unique = True, nullable = False) 
+    username = db.Column(db.String(255), unique = True) 
+    firstname = db.Column(db.String(255)) 
+    lastname = db.Column(db.String(255)) 
     image_file = db.Column(db.String(20), nullable=False, default='default.png')
-    email = db.Column(db.String(50), unique = True, nullable = False)
-    password = db.Column(db.String(255), unique = True, nullable = False)
-    date_of_birth = db.Column(db.Date, nullable=True)
-    gender = db.Column(db.String(10), unique = True, nullable = False)
-    instagram_link = db.Column(db.String(30), unique = True, nullable = False)
-    facebook_link = db.Column(db.String(30), unique = True, nullable = False)
+    email = db.Column(db.String(255), unique = True)
+    password = db.Column(db.String(255), unique = True)
+    date_of_birth = db.Column(db.Date)
+    gender = db.Column(db.String(10))
+    instagram_link = db.Column(db.String(255))
+    facebook_link = db.Column(db.String(255))
 
     def __repr__(self):
 
@@ -96,10 +97,16 @@ def create_dynamic_fields(questions):
         setattr(QuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
 
 
+qn = Question.query.all()
+opn = Options.query.all()
+ece_questions = [{"id":question.id, "content":question.content,
+                "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
+
+create_dynamic_fields(ece_questions)
 
 
 
-#----- Creating the Registration Form ------#
+
 class RegistrationForm(FlaskForm):
     
     firstname = StringField('Firstname', validators=[DataRequired(), Length(min=2, max=20)])
@@ -112,7 +119,7 @@ class RegistrationForm(FlaskForm):
     
     
     def validate_username(self, username):
-        print("Validating username:", username)
+     
         user = UserDetails.query.filter_by(username=username.data).first()
 
         if user:
@@ -124,7 +131,7 @@ class RegistrationForm(FlaskForm):
         
 
     def validate_email(self, email):
-        print("Validating username:", email)
+      
         email = UserDetails.query.filter_by(email=email.data).first()
 
         if email:
@@ -132,8 +139,18 @@ class RegistrationForm(FlaskForm):
 
 
 
+class ProfileForm(FlaskForm):
 
-#----- Creating the Login Form ------#
+    gender = RadioField('Gender', choices=[('male', 'Male'), ('female', 'Female')])
+    instagram_username = StringField('Instagram', validators=[DataRequired()])
+    facebook_username = StringField('Facebook', validators=[DataRequired()])
+    date_of_birth = DateField('Date of Birth')
+    submit = SubmitField('Finish')
+
+
+
+ 
+   
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -141,18 +158,23 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
-#----- Creating a Profile Form ------#
-class ProfileForm(FlaskForm):
+class UpdateInformation(FlaskForm):
+    firstname_update = StringField('Firstname', validators=[DataRequired()])
+    lastname_update = StringField('Lastname', validators=[DataRequired()])
+    username_update = StringField('Username', validators=[DataRequired()])
+    email_update = StringField('Email', validators=[DataRequired(), Email()])
+    gender_update = RadioField('Gender', choices=[('male', 'Male'), ('female', 'Female')])
+    ig_username_update = StringField('Instagram', validators=[DataRequired()])
+    fb_username_update = StringField('Facebook', validators=[DataRequired()])
+    date_of_birth_update = DateField('Date of Birth')
+    submit = SubmitField('Update')
 
-    gender = RadioField('Gender', choices=[('male', 'Male'), ('female', 'Female')])
-    age = StringField('Age', validators=[DataRequired()])
-    instagram_username = StringField('Instagram', validators=[DataRequired()])
-    facebook_username = StringField('Facebook', validators=[DataRequired()])
-    date_of_birth = DateField('Date of Birth')
-    submit = SubmitField('Save')
-          
+    def validate_email(self, firstname_update):
+         
+        firstname = UserDetails.query.filter_by(firstname=firstname_update.data).first()
 
-
+        if firstname:
+            raise ValidationError('Email already exists. Please choose other email')
 
 
 #----- Initializing Login Manager ------#
@@ -181,13 +203,19 @@ def home():
 @app.route('/member-register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
-        
+    
     if request.method == 'POST':
         if form.validate_on_submit():
-          return redirect(url_for('profile')) # return here ensures that the url for home page is sent back (return back) to the clients browser
+               
+             hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+             user = UserDetails(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data, email=form.email.data, password=hashed_password)
+             db.session.add(user)
+             db.session.commit()
+             return redirect(url_for('profile'))
+        
+  
 
 
-    
     return render_template('register_quiz.html', form=form)
         
 
@@ -195,21 +223,24 @@ def register():
 
 @app.route('/member-profile', methods=['GET', 'POST'])
 def profile():
+
     form = ProfileForm()
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-            user = UserDetails(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data, email=form.email.data, password=hashed_password, date_of_birth=form.date_of_birth, gender=gender, instagram_link=form.instagram_username, facebook_link=form.facebook_username)
-            db.session.add(user)
-            db.session.commit()
-            flash('Your account has been sucessfully created! You may now login', 'success')
-            return jsonify(form.data)
+             new_user = UserDetails.query.order_by(UserDetails.id.desc()).first()
 
+             if new_user:
+                new_user.date_of_birth = form.date_of_birth.data
+                new_user.gender = form.gender.data
+                new_user.instagram_link = form.instagram_username.data
+                new_user.facebook_link = form.facebook_username.data
+                db.session.commit()
+                flash('Account information updated successfully', 'success')
+                return redirect(url_for('login'))  # Redirect to login page after profile update
+            
 
     return render_template('user_profile.html', form=form) 
-
-
 
 
 
@@ -262,61 +293,43 @@ def email_validator(email):
     except EmailNotValidError:
         return False
 
+
 @app.route("/edit_information", methods=['GET', 'POST'])
+@login_required
 def edit_information():
-    error_message_firstname = ''
-    error_message_lastname = ''
-    error_message_username = ''
-    error_message_email = ''
+    form = UpdateInformation()
+
+    if request.method == 'GET':
+        form.firstname_update.data = current_user.firstname
+        form.lastname_update.data = current_user.lastname
+        form.username_update.data = current_user.username
+        form.email_update.data = current_user.email
+        form.date_of_birth_update.data = current_user.date_of_birth
+        form.gender_update.data = current_user.gender
+        form.ig_username_update.data = current_user.instagram_link 
+        form.fb_username_update.data = current_user.facebook_link
+    
+    elif request.method == 'POST':
+        user = UserDetails.query.filter_by(username=current_user.username).first()
+
+        if user:
+            user.firstname = form.firstname_update.data
+            user.lastname = form.lastname_update.data
+            user.username = form.username_update.data
+            user.email = form.email_update.data
+            user.date_of_birth = form.date_of_birth_update.data
+            user.gender = form.gender_update.data
+            user.instagram_link = form.ig_username_update.data
+            user.facebook_link = form.fb_username_update.data
+            db.session.commit()
+            return redirect(url_for('account'))
 
 
-    if request.method == 'POST':
-      firstname = request.form['firstname']
-      lastname = request.form['lastname']
-      username = request.form['username']
-      email = request.form['email']
-      error_flag = 0
-
-      user = UserDetails.query.filter_by(username=current_user.username).first()
-
-      if user:
-          if len(firstname) > 20:
-                flash('Firstname must be at least 20 characters')
-                error_flag = error_flag + 1
-          else:
-                user.firstname = firstname
-         
-          if len(lastname) > 20:
-                error_message_lastname = 'Lastname must be at least 20 characters'
-                error_flag = error_flag + 1
-          else:
-                user.lastname = lastname
-
-          if len(username) > 10:
-                error_message_username = 'Username must be at least 10 characters'
-                error_flag = error_flag + 1
-          else:
-                user.username= username
-
-          if email_validator(email):
-              user.email = email
-          
-          else: 
-              error_message_email = 'Username must be at least 10 characters'
-              error_flag = error_flag + 1
-              flash('Invalid email format')
-
-      db.session.commit()
-
-      if error_flag > 0: #Check if there are any error exist
-             
-          return redirect(url_for('edit_information'))
-      
-      else:
-          return redirect(url_for('account'))
+    return render_template('edit_info.html', form=form)
 
 
-    return render_template("edit_info.html")    
+
+
 
 
 @app.route('/edit_password', methods=['GET', 'POST'])

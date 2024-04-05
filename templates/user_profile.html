@@ -53,7 +53,7 @@
          <form method="POST" action="">
             {{form.hidden_tag()}}
             <fieldset class="field-form">
-                <legend class="legend">Profile Information</legend>
+                <legend class="legend">Profile Details</legend>
                     <div class="form-group">
                         <p>{{form.gender.label}}</p>
                         {% for option in form.gender.choices %}
@@ -73,7 +73,7 @@
                         <span> {{form.facebook_username.label}} {{form.facebook_username}}</span>  
                     </div>
             </fieldset>
-            <button type="submit" class="submit">Submit Answers</button>
+                 {{form.submit}}
          </form>
         
     </div>
