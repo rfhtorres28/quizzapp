@@ -169,12 +169,17 @@ class UpdateInformation(FlaskForm):
     date_of_birth_update = DateField('Date of Birth')
     submit = SubmitField('Update')
 
-    def validate_email(self, firstname_update):
-         
-        firstname = UserDetails.query.filter_by(firstname=firstname_update.data).first()
 
-        if firstname:
-            raise ValidationError('Email already exists. Please choose other email')
+    def validate_username(self, username_update):
+
+        user = UserDetails.query.filter_by(username=username_update.data).first()
+
+        if user:
+            raise ValidationError('Username is already taken')
+        
+
+
+
 
 
 #----- Initializing Login Manager ------#
@@ -213,7 +218,7 @@ def register():
              db.session.commit()
              return redirect(url_for('profile'))
         
-  
+    
 
 
     return render_template('register_quiz.html', form=form)
@@ -299,30 +304,31 @@ def email_validator(email):
 def edit_information():
     form = UpdateInformation()
 
-    if request.method == 'GET':
-        form.firstname_update.data = current_user.firstname
-        form.lastname_update.data = current_user.lastname
-        form.username_update.data = current_user.username
-        form.email_update.data = current_user.email
-        form.date_of_birth_update.data = current_user.date_of_birth
-        form.gender_update.data = current_user.gender
-        form.ig_username_update.data = current_user.instagram_link 
-        form.fb_username_update.data = current_user.facebook_link
     
-    elif request.method == 'POST':
-        user = UserDetails.query.filter_by(username=current_user.username).first()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+             current_user.firstname = form.firstname_update.data
+             current_user.lastname = form.lastname_update.data
+             current_user.username = form.username_update.data
+             current_user.email = form.email_update.data
+             current_user.date_of_birth = form.date_of_birth_update.data
+             current_user.gender = form.gender_update.data
+             current_user.instagram_link = form.ig_username_update.data
+             current_user.facebook_link = form.fb_username_update.data
+             db.session.commit()
+             return redirect(url_for('account'))
+        
 
-        if user:
-            user.firstname = form.firstname_update.data
-            user.lastname = form.lastname_update.data
-            user.username = form.username_update.data
-            user.email = form.email_update.data
-            user.date_of_birth = form.date_of_birth_update.data
-            user.gender = form.gender_update.data
-            user.instagram_link = form.ig_username_update.data
-            user.facebook_link = form.fb_username_update.data
-            db.session.commit()
-            return redirect(url_for('account'))
+    elif request.method == 'GET':
+             form.firstname_update.data = current_user.firstname
+             form.lastname_update.data = current_user.lastname
+             form.username_update.data = current_user.username
+             form.email_update.data = current_user.email
+             form.date_of_birth_update.data = current_user.date_of_birth
+             form.gender_update.data = current_user.gender
+             form.ig_username_update.data = current_user.instagram_link 
+             form.fb_username_update.data = current_user.facebook_link
+
 
 
     return render_template('edit_info.html', form=form)

@@ -75,6 +75,7 @@
             <fieldset>
                 <legend>Update Information</legend>
                 <form action="{{url_for('edit_information')}}" method="post">
+                      {{ form.csrf_token }}
                   <div>
                       <span>{{form.firstname_update.label}} {{form.firstname_update}}</span>
                   </div><br>     
@@ -83,6 +84,9 @@
                 </div><br>  
                 <div>
                   <span>{{form.username_update.label}} {{form.username_update}}</span>
+                    {% for error in form.errors%}
+                    <span> {{error}} </span>
+                    {%endfor%}
               </div><br> 
               <div>
                 <span>{{form.email_update.label}} {{form.email_update}}</span>
