@@ -1,14 +1,17 @@
-from flask import Flask, request, render_template, url_for, flash, redirect, get_flashed_messages, make_response, jsonify
+from flask import Flask, request, render_template, url_for, flash, redirect, get_flashed_messages, make_response, jsonify, session
 from flask_restful import Api, Resource
 from flask_bcrypt import Bcrypt 
 from flask_login import current_user, LoginManager, login_user, logout_user, login_required 
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitField, BooleanField, DateField
 from wtforms.validators import InputRequired, DataRequired, Length, Email, EqualTo, ValidationError
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_
+from sqlalchemy import UnicodeText
 from email_validator import validate_email, EmailNotValidError
+import secrets
+import os 
 
 
 #-----Initializing the flask app-------#
@@ -30,7 +33,8 @@ database_name= 'quizapp'
 
 #-----Initializing the Database-------#
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{username}:{password}@{host}:{port}/{database_name}'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{username}:{password}@{host}:{port}/{database_name}?charset=utf8mb4' # Modify MySQL database configuration to include the charset=utf8mb4 parameter to support unicode text
 db = SQLAlchemy(app)
 
 
@@ -42,13 +46,14 @@ class UserDetails(db.Model, UserMixin):
     username = db.Column(db.String(255), unique = True) 
     firstname = db.Column(db.String(255)) 
     lastname = db.Column(db.String(255)) 
-    image_file = db.Column(db.String(20), nullable=False, default='default.png')
+    image_file = db.Column(db.String(255), nullable=False, default='default.png')
     email = db.Column(db.String(255), unique = True)
     password = db.Column(db.String(255), unique = True)
     date_of_birth = db.Column(db.Date)
     gender = db.Column(db.String(10))
     instagram_link = db.Column(db.String(255))
     facebook_link = db.Column(db.String(255))
+    bio = db.Column(UnicodeText, nullable=True, default='')
 
     def __repr__(self):
 
@@ -115,7 +120,7 @@ class RegistrationForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match')])
-    submit = SubmitField('Sign Up')
+    submit = SubmitField('Next')
     
     
     def validate_username(self, username):
@@ -145,6 +150,8 @@ class ProfileForm(FlaskForm):
     instagram_username = StringField('Instagram', validators=[DataRequired()])
     facebook_username = StringField('Facebook', validators=[DataRequired()])
     date_of_birth = DateField('Date of Birth')
+    bio = StringField('Bio')
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Finish')
 
 
@@ -158,6 +165,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
+
 class UpdateInformation(FlaskForm):
     firstname_update = StringField('Firstname', validators=[DataRequired()])
     lastname_update = StringField('Lastname', validators=[DataRequired()])
@@ -167,6 +175,8 @@ class UpdateInformation(FlaskForm):
     ig_username_update = StringField('Instagram', validators=[DataRequired()])
     fb_username_update = StringField('Facebook', validators=[DataRequired()])
     date_of_birth_update = DateField('Date of Birth')
+    bio = StringField('Bio')
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
 
 
@@ -211,19 +221,26 @@ def register():
     
     if request.method == 'POST':
         if form.validate_on_submit():
-               
-             hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-             user = UserDetails(username=form.username.data, firstname=form.firstname.data, lastname=form.lastname.data, email=form.email.data, password=hashed_password)
-             db.session.add(user)
-             db.session.commit()
-             return redirect(url_for('profile'))
-        
-    
-
+            session['registration_data'] = {
+                'username': form.username.data,
+                'firstname': form.firstname.data,
+                'lastname': form.lastname.data,
+                'email': form.email.data,
+                'password': form.password.data
+            }     
+            return redirect(url_for('profile'))
 
     return render_template('register_quiz.html', form=form)
         
 
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    f_name, f_text = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_text
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+    form_picture.save(picture_path)
+
+    return picture_fn 
 
 
 @app.route('/member-profile', methods=['GET', 'POST'])
@@ -233,16 +250,34 @@ def profile():
 
     if request.method == 'POST':
         if form.validate_on_submit():
-             new_user = UserDetails.query.order_by(UserDetails.id.desc()).first()
+            
 
-             if new_user:
-                new_user.date_of_birth = form.date_of_birth.data
-                new_user.gender = form.gender.data
-                new_user.instagram_link = form.instagram_username.data
-                new_user.facebook_link = form.facebook_username.data
-                db.session.commit()
-                flash('Account information updated successfully', 'success')
-                return redirect(url_for('login'))  # Redirect to login page after profile update
+             registration_data = session.get('registration_data')
+             if registration_data:
+                   hashed_password = bcrypt.generate_password_hash(registration_data['password']).decode('utf-8')
+                   user = UserDetails(
+                          username=registration_data['username'],
+                          firstname=registration_data['firstname'],
+                          lastname=registration_data['lastname'],
+                          email=registration_data['email'],
+                          password=hashed_password
+                       )
+                   db.session.add(user)
+                   db.session.flush() # Flush to get the user's ID before committing
+                   
+                   # Update user profile with profile form data
+                   user.date_of_birth = form.date_of_birth.data
+                   user.gender = form.gender.data
+                   user.instagram_link = form.instagram_username.data
+                   user.facebook_link = form.facebook_username.data
+                   user.bio = form.bio.data
+                   if form.picture.data:
+                        picture_file = save_picture(form.picture.data)
+                        user.image_file = picture_file
+                   db.session.commit()
+                   flash('Account registered successfully', 'success')
+                   session.pop('registration_data')  # Remove registration data from session
+                   return redirect(url_for('login'))
             
 
     return render_template('user_profile.html', form=form) 
@@ -280,8 +315,9 @@ def account():
     
     present_user = current_user.firstname + ' ' + current_user.lastname
     username = current_user.username
+    bio = current_user.bio
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', image_file=image_file, present_user=present_user, username=username)
+    return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio)
 
 
 
@@ -315,6 +351,11 @@ def edit_information():
              current_user.gender = form.gender_update.data
              current_user.instagram_link = form.ig_username_update.data
              current_user.facebook_link = form.fb_username_update.data
+             current_user.bio = form.bio.data
+             
+             if form.picture.data:
+                        picture_file = save_picture(form.picture.data)
+                        current_user.image_file = picture_file
              db.session.commit()
              return redirect(url_for('account'))
         
@@ -328,6 +369,8 @@ def edit_information():
              form.gender_update.data = current_user.gender
              form.ig_username_update.data = current_user.instagram_link 
              form.fb_username_update.data = current_user.facebook_link
+             form.picture.data = current_user.image_file
+             form.bio.data = current_user.bio
 
 
 
