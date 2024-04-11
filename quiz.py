@@ -63,12 +63,12 @@ class UserDetails(db.Model, UserMixin):
 
 
 
-class Question(db.Model):
+class ElecsQuestions(db.Model):
 
-    __tablename__ = 'questions'
+    __tablename__ = 'elecsquestions'
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(255), nullable=False)
-    options = db.relationship('Options', backref='questions', lazy=True)
+    options = db.relationship('ElecsOptions', backref='elecsquestions', lazy=True)
 
     def __repr__(self):
 
@@ -76,11 +76,11 @@ class Question(db.Model):
 
 
 
-class Options(db.Model):
+class ElecsOptions(db.Model):
 
-    __tablename__ = 'options'
+    __tablename__ = 'elecsoptions'
     id = db.Column(db.Integer, primary_key=True)
-    question_no = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
+    question_no = db.Column(db.Integer, db.ForeignKey('elecsquestions.id'), nullable=False)
     letter = db.Column(db.String(1), nullable=False )
     content = db.Column(db.String(255), nullable=False)
     is_correct = db.Column(db.Boolean, nullable=False)
@@ -90,9 +90,38 @@ class Options(db.Model):
         return f"Options('{self.letter}', '{self.content}', '{self.is_correct}')"
 
 
+class CommsQuestions(db.Model):
+
+    __tablename__ = 'commsquestions'
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.String(255), nullable=False)
+    options = db.relationship('CommsOptions', backref='commsquestions', lazy=True)
+
+    def __repr__(self):
+
+        return f"Question('{self.content}', '{self.options}')"
+
+
+
+class CommsOptions(db.Model):
+
+    __tablename__ = 'commsoptions'
+    id = db.Column(db.Integer, primary_key=True)
+    question_no = db.Column(db.Integer, db.ForeignKey('commsquestions.id'), nullable=False)
+    letter = db.Column(db.String(1), nullable=False )
+    content = db.Column(db.String(255), nullable=False)
+    is_correct = db.Column(db.Boolean, nullable=False)
+
+    def __repr__(self):
+
+        return f"Options('{self.letter}', '{self.content}', '{self.is_correct}')"
+
+
+
 class UserResult(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(20))
     user_id = db.Column(db.Integer, db.ForeignKey('userdetails.id'), nullable=False)
     session_id = db.Column(db.String(50), nullable=False)
     score_percentage = db.Column(db.String(5))
@@ -105,8 +134,7 @@ class UserResult(db.Model):
         return f"UserSession(session_id='{self.session_id}', timestamp='{self.timestamp}')"
 
 
-
-
+# Creating Electronics Quiz Form
 
 class QuizForm(FlaskForm):
     user_id = HiddenField()
@@ -120,13 +148,36 @@ def create_dynamic_fields(questions):
         setattr(QuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
 
 
-qn = Question.query.all()
-opn = Options.query.all()
+
+qn = ElecsQuestions.query.all()
+opn = ElecsOptions.query.all()
 ece_questions = [{"id":question.id, "content":question.content,
                 "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
 
 create_dynamic_fields(ece_questions)
 
+
+# Creating Communications Quiz Form
+
+class CommsQuizForm(FlaskForm):
+    user_id = HiddenField()
+
+def create_dynamic_fields(questions):
+    
+    for i, question in enumerate(questions, start=1):
+        choices = [(option['letter'], option['content']) for option in question['options']] # a list of tuples, elements can be access same as a list
+        field_name = f'Question {i}.'
+        field_label = question['content']
+        setattr(CommsQuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
+
+
+
+qn = CommsQuestions.query.all()
+opn = CommsOptions.query.all()
+comms_questions = [{"id":question.id, "content":question.content,
+                "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
+
+create_dynamic_fields(comms_questions)
 
 
 
@@ -250,6 +301,7 @@ def register():
 
     return render_template('register_quiz.html', form=form)
         
+
 
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
@@ -432,6 +484,7 @@ def page_not_found(error):
         return "Page Not Found", 404 
 
 
+# Creating API Resource for Electronics Questions 
 class Electronics(Resource):
    
    @login_required
@@ -440,7 +493,7 @@ class Electronics(Resource):
             return redirect(url_for('login'))
        
        form = QuizForm() 
-       return make_response(render_template('quiz.html', questions=ece_questions, form=form))
+       return make_response(render_template('elecsquiz.html', questions=ece_questions, form=form))
        
    
    def post(self):
@@ -470,7 +523,7 @@ class Electronics(Resource):
             score_percentage = no_correct_answer/total_questions*100
             score_percentage = round(score_percentage, 2)
             completion_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            user_result= {"session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time}
+            user_result= {"subject":"Electronics", "session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time}
 
             if current_user.is_authenticated:
                 session["user_result"] = user_result # store the user_result to the session
@@ -480,28 +533,90 @@ class Electronics(Resource):
                      score_percentage = session_user_result["score_percentage"]
                      no_correct_answer = session_user_result["no_correct_answer"]
                      timestamp = session_user_result["timestamp"]
+                     subject = session_user_result["subject"]
                 
             if session_id:
-                     new_result = UserResult(user_id=current_user.id, session_id=session_id, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
+                     new_result = UserResult(user_id=current_user.id, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
                      db.session.add(new_result)
                      db.session.commit()
 
 
-            return make_response(render_template('result1.html', form=form, score_percentage=score_percentage,
+            return make_response(render_template('elecs_result.html', form=form, score_percentage=score_percentage,
                    no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers))
    
 
    
+ # Creating API Resource for Communications Questions 
+class Communications(Resource):
    
+   @login_required
+   def get(self):
+       if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+       
+       form = CommsQuizForm() 
+       return make_response(render_template('commsquiz.html', questions=comms_questions, form=form))
+       
+   
+   def post(self):
+            
+            form = CommsQuizForm() 
+            no_correct_answer = 0
+            correct_answers = []
+            total_questions = len(comms_questions)
+            user_responses = {}
+            form_data = {}
+            user_result = {}
+            session_id = secrets.token_hex(16)
+            session['sid'] = session_id
+
+            if form.validate_on_submit():
+                form_data = request.form.to_dict()  
+    
+            for question in comms_questions: 
+                user_response = form_data.get(f'Question {question["id"]}.') 
+                correct_response = [x for x in question['options'] if x['is_correct']==True] 
+                correct_answers.append(correct_response) 
+                user_responses[f'Question {question["id"]}'] = user_response
+                if user_response == correct_response[0]["letter"]:
+                    no_correct_answer += 1
+
+            session_id = session.get('sid')
+            score_percentage = no_correct_answer/total_questions*100
+            score_percentage = round(score_percentage, 2)
+            completion_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            user_result= {"subject":"Communications", "session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time}
+
+            if current_user.is_authenticated:
+                session["user_result"] = user_result # store the user_result to the session
+                session_user_result = session.get("user_result")
+
+            if session_user_result:
+                     score_percentage = session_user_result["score_percentage"]
+                     no_correct_answer = session_user_result["no_correct_answer"]
+                     timestamp = session_user_result["timestamp"]
+                     subject = session_user_result["subject"]
+                
+            if session_id:
+                     new_result = UserResult(user_id=current_user.id, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
+                     db.session.add(new_result)
+                     db.session.commit()
+
+
+            return make_response(render_template('comms_result.html', form=form, score_percentage=score_percentage,
+                   no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers))  
        
 
 
 api.add_resource(Electronics, '/electronics')
+api.add_resource(Communications, '/communications')
+
+
 
 
 @app.route('/electronics/answers')
 @login_required #Safety feature so that user that is not authenticated cant access the correct answers
-def answers():
+def elecsanswers():
     correct_answers = []
     
     if current_user.is_authenticated:
@@ -511,8 +626,22 @@ def answers():
              
       
 
-    return render_template('correct_answers.html', correct_answers=correct_answers)
+    return render_template('elecs_correct_answers.html', correct_answers=correct_answers)
 
+
+@app.route('/communications/answers')
+@login_required #Safety feature so that user that is not authenticated cant access the correct answers
+def commsanswers():
+    correct_answers = []
+    
+    if current_user.is_authenticated:
+        for question in comms_questions:
+            correct_response = [x for x in question['options'] if x['is_correct']==True] 
+            correct_answers.append(correct_response)  
+             
+      
+
+    return render_template('comms_correct_answers.html', correct_answers=correct_answers)
 
 
 

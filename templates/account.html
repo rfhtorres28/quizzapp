@@ -188,17 +188,31 @@
         }
         .main-section {
             display: flex;
+            justify-content: left;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
-            width: 1000px;
-            height: 700px;
+            width: 1200px;
+            height: 800px;
         }
         .user_result {
+            display: block;
+            justify-content: center;
+            text-align: center;
+            height: 100vh; /*100% of the viewport height */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
-            width: 450px;
-            height: 300px;
+            width: 600px;
+            height: 400px;
             margin-left: 100px;
 
         }
+        .user_result .table_result {
+
+            margin: 0 auto;
+        }
+        .user_result table {
+        margin: 0 auto; /* Set left and right margins to auto */
+        width: 90%; /* Adjust the width as needed */
+       }
+        
         </style>
       
     
@@ -209,7 +223,7 @@
         <ul class="menu">
             <img src="static\logo.png" alt="Example Image" class="logo">
             <li class="electronics"><a href = "{{url_for('electronics')}}">Electronics</a></li>
-            <li class="communications"><a href = "{{url_for('electronics')}}">Communications</a></li>
+            <li class="communications"><a href = "{{url_for('communications')}}">Communications</a></li>
             <li class="geas"><a href = "{{url_for('electronics')}}">GEAS</a></li>
             <li class="math"><a href = "{{url_for('electronics')}}">Math</a></li>
         </ul>
@@ -244,8 +258,17 @@
     {% endwith %}
 
     <div class="user_result">
-        <p>User Result</p>
-
+        <p>Quiz Log Result</p>
+        <div class="table_result">
+           <table  border="2">
+               <tr>
+                   <th>Subject</th>
+                   <th>Date Answered</th>
+                   <th>Score Percentage</th>
+                   <th>Number of Correct Answer</th>
+               </tr>
+           </table>
+       </div>
     </div>
     </div>
    

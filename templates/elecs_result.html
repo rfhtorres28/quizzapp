@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results</title>
+    <link rel="stylesheet" href="static/main.css">
+    <style>
+ 
+        nav {
+          background-color: #333; /* Background color of the navigation bar */
+              color: #fff; /* Text color of the navigation links */
+              padding: 10px; /* Padding around the navigation links */
+              display: flex; /* Use flexbox for layout */
+              justify-content: flex-start; /* Space items evenly along the main axis */
+              align-items: center; /* Center items along the cross axis */
+          }
+          ul {
+              list-style-type: none; /* Remove bullet points from the list */
+              margin: 0; /* Remove default margin */
+              padding: 0; /* Remove default padding */
+          }
+             
+          li {
+              display: inline; /* Display list items horizontally */
+              margin-right: 30px; /* Add spacing between navigation links */
+          }
+          li.title {
+              font-family: Arial, sans-serif; /* Set the font family */
+              font-size: 25px; /* Set the font size */
+              font-weight: None; /* Set the font weight */         
+          }   
+          body {
+              margin: 0;
+          }               
+          li.back-to-home {
+              font-size: 16px;
+              position: relative;
+              top: -3px
+          }
+          li.logout  {
+                  font-size: 16px;
+                  position: relative;
+                  top: -3px;
+                  left: 1000px;
+          }
+          a {
+              color:#fff;
+              text-decoration: none;
+          }
+        h1.course{
+          position: relative;
+          left: 25px;
+  
+        }
+        h2.instructions{
+          position: relative;
+          left: 25px;
+         
+        }
+        div.section{
+          position: relative;
+          left: -15px;
+          top: 10px;
+        }
+        button.submit{
+          position: relative;
+          left: 40px;
+        }
+        h1.result{
+        position: relative;
+        left: 25px;
+        font-size: 25px;
+        color: red;
+        font-weight: normal;
+
+      }
+    
+      button.restart-test{
+        position: relative;
+        left: 25px;
+      }
+      button.correct-answer{
+        position: relative;
+        left: 25px;
+      }
+      div.invalid-feedback{
+        color:red
+      }
+      
+      </style>
+    
+</head>
+
+<body>
+    <nav>
+        <ul>
+      
+            <li class="title">ECEBix</li>
+            <li class="back-to-home"><a href = "{{url_for('home')}}">Home</a></li>
+            <li class="logout"><a href = "{{url_for('logout')}}">Logout</a></li>
+           
+        </ul>
+
+    </nav>
+    <h1 class="result">Your score is {{no_correct_answer}} out of {{total_questions}}, {{score_percentage}}%</h1>
+  
+   <div class="section">
+   <ol type="1">
+        {% for field in form %}
+            {% if field.name not in ['csrf_token', 'user_id'] %}
+                <p>
+                    <p>{{field.id}} {{ field.label.text }}</p>
+                    {% for option in field.choices %}
+                        <label>
+                            <input type="radio" name="{{ field.id }}" value="{{ option[0] }}" {% if option[0] == field.data %} checked{% endif %} disabled> <!-- "checked" attribute is used when making a radio button selected by default -->
+                            {{ option[1] }}
+                        </label><br>
+                    {% endfor %}
+                    {% if field.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in field.errors %}
+                               <p> <span>{{ error }}</span></p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </p>
+            {% endif %}
+        {% endfor %}
+    </ol>
+    </div>
+    
+    
+    <br>
+    <button type="button" onclick="window.location.href = '{{url_for('communications')}}';" class="restart-test">Restart the Test</button>
+   <p> <button type="button" onclick="window.location.href = '{{url_for('commsanswers')}}';" class="correct-answer">Correct Answers</button></p>
+</body>
+</html>
