@@ -186,6 +186,19 @@
             font-weight: bold;
             
         }
+        .main-section {
+            display: flex;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+            width: 1000px;
+            height: 700px;
+        }
+        .user_result {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+            width: 450px;
+            height: 300px;
+            margin-left: 100px;
+
+        }
         </style>
       
     
@@ -213,6 +226,7 @@
     </nav>
 
     <br>
+    <div class="main-section">
     <div class="user-section">
         <div class="user-header">
                 <img src="{{image_file}}" alt="Example Image" class="user_profile_image">
@@ -228,6 +242,12 @@
             <p class="error-message">{{ messages[0] }}</p>    
     {% endif %}
     {% endwith %}
+
+    <div class="user_result">
+        <p>User Result</p>
+
+    </div>
+    </div>
    
   
 </body>

@@ -12,6 +12,7 @@ from sqlalchemy import UnicodeText
 from email_validator import validate_email, EmailNotValidError
 import secrets
 import os 
+from datetime import datetime
 
 
 #-----Initializing the flask app-------#
@@ -19,6 +20,7 @@ import os
 app = Flask(__name__)
 api = Api(app)
 app.config['SECRET_KEY'] = '582ea1bb8309ccf43fd65b39d593a6a6'
+app.secret_key = 'Tootsie@2714'
 bcrypt = Bcrypt(app)
 
 
@@ -86,6 +88,22 @@ class Options(db.Model):
     def __repr__(self):
 
         return f"Options('{self.letter}', '{self.content}', '{self.is_correct}')"
+
+
+class UserResult(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('userdetails.id'), nullable=False)
+    session_id = db.Column(db.String(50), nullable=False)
+    score_percentage = db.Column(db.String(5))
+    no_correct_answer = db.Column(db.String(5))
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+    def __repr__(self):
+
+        return f"UserSession(session_id='{self.session_id}', timestamp='{self.timestamp}')"
+
 
 
 
@@ -243,6 +261,8 @@ def save_picture(form_picture):
     return picture_fn 
 
 
+
+
 @app.route('/member-profile', methods=['GET', 'POST'])
 def profile():
 
@@ -285,8 +305,6 @@ def profile():
 
 
 
-
-
 @app.route('/member-login', methods=['GET', 'POST'])
 def login():
 
@@ -318,7 +336,6 @@ def account():
     bio = current_user.bio
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio)
-
 
 
 
@@ -434,6 +451,9 @@ class Electronics(Resource):
             total_questions = len(ece_questions)
             user_responses = {}
             form_data = {}
+            user_result = {}
+            session_id = secrets.token_hex(16)
+            session['sid'] = session_id
 
             if form.validate_on_submit():
                 form_data = request.form.to_dict()  
@@ -446,12 +466,31 @@ class Electronics(Resource):
                 if user_response == correct_response[0]["letter"]:
                     no_correct_answer += 1
 
-  
+            session_id = session.get('sid')
             score_percentage = no_correct_answer/total_questions*100
             score_percentage = round(score_percentage, 2)
-         
+            completion_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            user_result= {"session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time}
+
+            if current_user.is_authenticated:
+                session["user_result"] = user_result # store the user_result to the session
+                session_user_result = session.get("user_result")
+
+            if session_user_result:
+                     score_percentage = session_user_result["score_percentage"]
+                     no_correct_answer = session_user_result["no_correct_answer"]
+                     timestamp = session_user_result["timestamp"]
+                
+            if session_id:
+                     new_result = UserResult(user_id=current_user.id, session_id=session_id, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
+                     db.session.add(new_result)
+                     db.session.commit()
+
+
             return make_response(render_template('result1.html', form=form, score_percentage=score_percentage,
                    no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers))
+   
+
    
    
        
@@ -464,11 +503,14 @@ api.add_resource(Electronics, '/electronics')
 @login_required #Safety feature so that user that is not authenticated cant access the correct answers
 def answers():
     correct_answers = []
+    
     if current_user.is_authenticated:
         for question in ece_questions:
             correct_response = [x for x in question['options'] if x['is_correct']==True] 
-            correct_answers.append(correct_response) 
-    
+            correct_answers.append(correct_response)  
+             
+      
+
     return render_template('correct_answers.html', correct_answers=correct_answers)
 
 
