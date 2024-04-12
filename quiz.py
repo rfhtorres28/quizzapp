@@ -379,7 +379,7 @@ def login():
 
 
 
-@app.route("/account")
+@app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
     
@@ -387,7 +387,15 @@ def account():
     username = current_user.username
     bio = current_user.bio
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio)
+    record = [] 
+
+    if request.method == 'POST':
+         selected_course = request.form['course']
+         user = UserResult.query.filter_by(user_id=current_user.id, subject=selected_course).all()
+         record = [{"subject":result.subject, "score_percentage":result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp":result.timestamp} for result in user]
+         
+         
+    return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio, record=record)
 
 
 
@@ -497,7 +505,35 @@ class Electronics(Resource):
        
    
    def post(self):
-            
+            # Fetching new electronics questions from the administrator     
+            if request.data:
+                 data = request.json
+                 totalquestions = ElecsQuestions.query.count()
+                 question = data.get('content')
+                 options = data.get('options')
+
+                 if question:
+                    question_id = totalquestions + 1
+                    new_question = ElecsQuestions(id=question_id, content=question) 
+                    db.session.add(new_question)
+                    db.session.commit()
+
+                    if options:  
+                      id = ElecsOptions.query.count()  
+                      question_no = totalquestions + 1     
+                      for option_data in options:    
+                             id += 1
+                             letter = option_data['letter']
+                             content = option_data['content']
+                             is_correct = option_data['is_correct']
+                             new_option = ElecsOptions(id=id, question_no=question_no, letter=letter, content=content, is_correct=is_correct)
+                             db.session.add(new_option)
+                             db.session.commit()
+
+                 return jsonify({"message":"Question added succesfully"})
+                 
+                               
+
             form = QuizForm() 
             no_correct_answer = 0
             correct_answers = []
@@ -508,6 +544,7 @@ class Electronics(Resource):
             session_id = secrets.token_hex(16)
             session['sid'] = session_id
 
+                 
             if form.validate_on_submit():
                 form_data = request.form.to_dict()  
     
@@ -543,10 +580,11 @@ class Electronics(Resource):
 
             return make_response(render_template('elecs_result.html', form=form, score_percentage=score_percentage,
                    no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers))
+         
    
 
    
- # Creating API Resource for Communications Questions 
+# Creating API Resource for Communications Questions 
 class Communications(Resource):
    
    @login_required
@@ -570,6 +608,7 @@ class Communications(Resource):
             session_id = secrets.token_hex(16)
             session['sid'] = session_id
 
+           
             if form.validate_on_submit():
                 form_data = request.form.to_dict()  
     
@@ -614,6 +653,7 @@ api.add_resource(Communications, '/communications')
 
 
 
+
 @app.route('/electronics/answers')
 @login_required #Safety feature so that user that is not authenticated cant access the correct answers
 def elecsanswers():
@@ -622,11 +662,11 @@ def elecsanswers():
     if current_user.is_authenticated:
         for question in ece_questions:
             correct_response = [x for x in question['options'] if x['is_correct']==True] 
-            correct_answers.append(correct_response)  
-             
+            correct_answers.append(correct_response)       
       
 
     return render_template('elecs_correct_answers.html', correct_answers=correct_answers)
+
 
 
 @app.route('/communications/answers')

@@ -9,7 +9,7 @@ def make_api_request():
     #response = requests.delete(url)
 
     #response = requests.get(url) #-for retrieving operation 
-    #response = requests.post(url, json=data)  
+    response = requests.post(url, json=data)  
     #response = requests.put(url, json=data) #for updating data
 
     if response.status_code == 200:

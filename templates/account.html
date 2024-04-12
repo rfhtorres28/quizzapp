@@ -71,7 +71,7 @@
             margin-top: 30px;
             
         }
-        .dropdown{
+        .dropdown {
             display: inline-block;
             margin: 0 0 0 1125px;
             position: relative;
@@ -204,15 +204,37 @@
             margin-left: 100px;
 
         }
-        .user_result .table_result {
 
-            margin: 0 auto;
-        }
         .user_result table {
         margin: 0 auto; /* Set left and right margins to auto */
         width: 90%; /* Adjust the width as needed */
        }
-        
+       
+       .user_result .dropdown-2 {
+            display: inline-block;
+            margin-top: 250px;
+            margin-right: -400px;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
+            
+       }
+       .user_result .dropdown-2 a {
+        display: block;
+        color: black;
+        text-decoration: none;
+        padding: 5px 5px;
+       }
+       .user_result .content-2 {
+        display: none;
+        position: absolute;
+        background-color: rgb(188, 188, 188);
+       }
+       .user_result .dropdown-2:hover .content-2 {
+        display: block;
+
+       }
+       .user_result .dropdown-2 a:hover {
+        background-color: rgb(227, 227, 227);
+       }
         </style>
       
     
@@ -221,7 +243,7 @@
 
     <nav>
         <ul class="menu">
-            <img src="static\logo.png" alt="Example Image" class="logo">
+            <img src="{{url_for('static', filename='logo.png')}}" alt="Example Image" class="logo">
             <li class="electronics"><a href = "{{url_for('electronics')}}">Electronics</a></li>
             <li class="communications"><a href = "{{url_for('communications')}}">Communications</a></li>
             <li class="geas"><a href = "{{url_for('electronics')}}">GEAS</a></li>
@@ -257,19 +279,46 @@
     {% endif %}
     {% endwith %}
 
+  
     <div class="user_result">
         <p>Quiz Log Result</p>
         <div class="table_result">
-           <table  border="2">
-               <tr>
-                   <th>Subject</th>
-                   <th>Date Answered</th>
+           <table border="2">
+            <thead>
+               <tr>                 
+                   <th>Subject</th>   
                    <th>Score Percentage</th>
                    <th>Number of Correct Answer</th>
+                   <th>Date Answered</th>
                </tr>
+            </thead>
+            <tbody>
+                {%for log in record:%}
+                <tr>
+                    <td>{{log["subject"]}}</td>
+                    <td>{{log["score_percentage"]}}</td>
+                    <td>{{log["correct_answer"]}}</td>
+                    <td>{{log["timestamp"]}}</td>
+                </tr>
+                {%endfor%}
+            </tbody>
            </table>
        </div>
+       <form id="courseForm" action="" method="POST">
+       <div class="dropdown-2">
+            <button>Course &#9660;</button>
+            <div class="content-2">
+                <a href="#" onclick="document.getElementById('courseInput').value = 'Electronics'; document.getElementById('courseForm').submit();">Electronics</a>
+                <a href="#" onclick="document.getElementById('courseInput').value = 'Communications'; document.getElementById('courseForm').submit();">Communications</a>
+            </div> 
+       </div>
+       <input type="hidden" id="courseInput" name="course">
+       </form>
     </div>
+
+    
+    
+    
     </div>
    
   
