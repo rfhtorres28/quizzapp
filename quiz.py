@@ -13,7 +13,7 @@ from email_validator import validate_email, EmailNotValidError
 import secrets
 import os 
 from datetime import datetime
-
+import random
 
 #-----Initializing the flask app-------#
         
@@ -139,22 +139,13 @@ class UserResult(db.Model):
 class QuizForm(FlaskForm):
     user_id = HiddenField()
 
-def create_dynamic_fields(questions):
-    
-    for i, question in enumerate(questions, start=1):
-        choices = [(option['letter'], option['content']) for option in question['options']] # a list of tuples, elements can be access same as a list
-        field_name = f'Question {i}.'
-        field_label = question['content']
-        setattr(QuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
-
 
 
 qn = ElecsQuestions.query.all()
 opn = ElecsOptions.query.all()
 ece_questions = [{"id":question.id, "content":question.content,
-                "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
+                 "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
 
-create_dynamic_fields(ece_questions)
 
 
 # Creating Communications Quiz Form
@@ -163,6 +154,7 @@ class CommsQuizForm(FlaskForm):
     user_id = HiddenField()
 
 def create_dynamic_fields(questions):
+    
     
     for i, question in enumerate(questions, start=1):
         choices = [(option['letter'], option['content']) for option in question['options']] # a list of tuples, elements can be access same as a list
@@ -491,20 +483,36 @@ def page_not_found(error):
     else:
         return "Page Not Found", 404 
 
+field_labels = {}
 
 # Creating API Resource for Electronics Questions 
 class Electronics(Resource):
+   
    
    @login_required
    def get(self):
        if not current_user.is_authenticated:
             return redirect(url_for('login'))
        
+       def create_dynamic_fields(questions):
+         
+         random.shuffle(questions)
+         for i, question in enumerate(questions, start=1):
+            choices = [(option['letter'], option['content']) for option in question['options']] # a list of tuples, elements can be access same as a list
+            field_name = f'Question {i}'
+            field_label = question['content']
+            setattr(QuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
+            field_labels[field_name] = field_label
+         
+
+       create_dynamic_fields(ece_questions)
+       
        form = QuizForm() 
-       return make_response(render_template('elecsquiz.html', questions=ece_questions, form=form))
+       return make_response(render_template('elecsquiz.html', form=form))
        
    
    def post(self):
+            global field_labels
             # Fetching new electronics questions from the administrator     
             if request.data:
                  data = request.json
@@ -530,37 +538,53 @@ class Electronics(Resource):
                              db.session.add(new_option)
                              db.session.commit()
 
+            
+
                  return jsonify({"message":"Question added succesfully"})
                  
                                
 
             form = QuizForm() 
             no_correct_answer = 0
-            correct_answers = []
+            user_response = []
             total_questions = len(ece_questions)
-            user_responses = {}
-            form_data = {}
-            user_result = {}
+            correct_options = []
+            correct_option = []
+            questions = []
             session_id = secrets.token_hex(16)
             session['sid'] = session_id
 
-                 
-            if form.validate_on_submit():
-                form_data = request.form.to_dict()  
-    
-            for question in ece_questions: 
-                user_response = form_data.get(f'Question {question["id"]}.') 
-                correct_response = [x for x in question['options'] if x['is_correct']==True] 
-                correct_answers.append(correct_response) 
-                user_responses[f'Question {question["id"]}'] = user_response
-                if user_response == correct_response[0]["letter"]:
+            for question in field_labels.values():
+                 questions.append(question)
+
+            # Checking if whether the user response is correct or not, request.form-> user answers, 
+            for form_question in field_labels.values():
+                for elecs_question in ece_questions:
+                    if elecs_question["content"] == form_question:
+                        for option in elecs_question["options"]:
+                            if option["is_correct"]:
+                                    correct_options.append(option)
+
+                   
+      
+
+            filtered_form = {key: value for key, value in request.form.items() if key not in ['user_id', 'csrf_token']}
+
+            for value in filtered_form.values():
+                user_response.append(value)
+
+            for option in correct_options:
+                correct_option.append(option['letter'])
+            
+            for i in range(len(user_response)):
+                if user_response[i] == correct_option[i]:
                     no_correct_answer += 1
 
             session_id = session.get('sid')
             score_percentage = no_correct_answer/total_questions*100
             score_percentage = round(score_percentage, 2)
             completion_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            user_result= {"subject":"Electronics", "session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time}
+            user_result= {"subject":"Electronics", "session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time, "correct_answer":correct_option, "question":questions}
 
             if current_user.is_authenticated:
                 session["user_result"] = user_result # store the user_result to the session
@@ -571,7 +595,8 @@ class Electronics(Resource):
                      no_correct_answer = session_user_result["no_correct_answer"]
                      timestamp = session_user_result["timestamp"]
                      subject = session_user_result["subject"]
-                
+                     
+            
             if session_id:
                      new_result = UserResult(user_id=current_user.id, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
                      db.session.add(new_result)
@@ -579,7 +604,7 @@ class Electronics(Resource):
 
 
             return make_response(render_template('elecs_result.html', form=form, score_percentage=score_percentage,
-                   no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers))
+                   no_correct_answer=no_correct_answer, total_questions=total_questions))    
          
    
 
@@ -657,15 +682,12 @@ api.add_resource(Communications, '/communications')
 @app.route('/electronics/answers')
 @login_required #Safety feature so that user that is not authenticated cant access the correct answers
 def elecsanswers():
-    correct_answers = []
-    
-    if current_user.is_authenticated:
-        for question in ece_questions:
-            correct_response = [x for x in question['options'] if x['is_correct']==True] 
-            correct_answers.append(correct_response)       
-      
 
-    return render_template('elecs_correct_answers.html', correct_answers=correct_answers)
+    correct_answers = session["user_result"]["correct_answer"] 
+    questions = session["user_result"]["question"]
+
+   
+    return render_template('elecs_correct_answers.html', correct_answers=correct_answers, questions=questions)
 
 
 

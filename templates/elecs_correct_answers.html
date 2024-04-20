@@ -67,11 +67,11 @@
     </nav>
     <div class="content-section">
         <h2>Answer Key</h2>
-            {%for correct_answer in correct_answers%}
-             <p>{{correct_answer[0]['question_no']}}. {{correct_answer[0]['content']}}</p>
-             {%endfor%}
-
-
+        {% for i in range(correct_answers|length) %}
+        {% set correct_answer = correct_answers[i] %}
+        {% set question = questions[i] %}
+        {{ question }} -> {{ correct_answer }} <br>
+        {% endfor %}
 
         <div>
             <button type="button" onclick="window.location.href = '{{url_for('electronics')}}';">Restart the Test</button>    
