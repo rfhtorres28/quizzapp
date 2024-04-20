@@ -11,17 +11,21 @@
       nav {
         background-color: #333; /* Background color of the navigation bar */
             color: #fff; /* Text color of the navigation links */
-            padding: 10px; /* Padding around the navigation links */
             display: flex; /* Use flexbox for layout */
-            justify-content: flex-start; /* Space items evenly along the main axis */
-            align-items: center; /* Center items along the cross axis */
+            flex-direction: row;
+            align-items: center;
+            padding: -10px;
+            height: 80px;
         }
         ul {
             list-style-type: none; /* Remove bullet points from the list */
             margin: 0; /* Remove default margin */
             padding: 0; /* Remove default padding */
         }
-           
+        img {
+          width: 170px;
+          height: auto;
+        }
         li {
             display: inline; /* Display list items horizontally */
             margin-right: 30px; /* Add spacing between navigation links */
@@ -35,15 +39,16 @@
             margin: 0;
         }               
         li.back-to-home {
-            font-size: 16px;
+            font-size: 17px;
             position: relative;
-            top: -3px
+            top: -40px;
+            margin-left: 25px;
         }
         li.logout  {
-                font-size: 16px;
+                font-size: 17px;
                 position: relative;
-                top: -3px;
-                left: 1000px;
+                top: -40px;
+                left: 800px;
         }
         a {
             color:#fff;
@@ -77,13 +82,11 @@
     <nav>
         <ul>
       
-            <li class="title">ECEBix</li>
+            <img src="static\logo.png" alt="Example Image" class="logo">
             <li class="back-to-home"><a href = "{{url_for('home')}}">Home</a></li>
             <li class="logout"><a href = "{{url_for('logout')}}">Logout</a></li>
            
         </ul>
-     
-
     </nav>
             
             <h1 class="course">Communications</h1>

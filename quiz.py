@@ -24,7 +24,7 @@ app.secret_key = 'Tootsie@2714'
 bcrypt = Bcrypt(app)
 
 
-#------ Creating a user database -------#
+#------ configuring the database -------#
 
 username='root'
 password= 'Toootsie@1430'
@@ -322,7 +322,6 @@ def profile():
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            
 
              registration_data = session.get('registration_data')
              if registration_data:
@@ -367,8 +366,6 @@ def login():
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user) # Get the state of the user that is currently login, so it means that if a user logs in, it is stored in the login_user()
             return redirect(url_for('account'))
-        
-
         else:
             flash('User not found, Please try again')
             return redirect(url_for('login'))
@@ -386,6 +383,9 @@ def account():
     present_user = current_user.firstname + ' ' + current_user.lastname
     username = current_user.username
     bio = current_user.bio
+    email = current_user.email
+    instagram = f'https://www.instagram.com/{current_user.instagram_link}'
+    facebook = f'https://www.facebook.com/{current_user.facebook_link}'
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     record = [] 
 
@@ -395,7 +395,7 @@ def account():
          record = [{"subject":result.subject, "score_percentage":result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp":result.timestamp} for result in user]
          
          
-    return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio, record=record)
+    return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio, record=record, instagram=instagram, facebook=facebook, email=email)
 
 
 
