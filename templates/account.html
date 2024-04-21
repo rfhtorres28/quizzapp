@@ -6,86 +6,53 @@
         <title>Home</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <style>  
-        body, html {
+         body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             height: 100vh;
         }
-         nav{
-            background-color: #333; /* Background color of the navigation bar */
-           color: #fff; /* Text color of the navigation links */
-           padding: 10px; /* Padding around the navigation links */
-           height: 60px; 
+         .nav-bar{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            height: 90px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  
+            background-color: black;
+          }
+          .nav-bar img {
+            width: 170px;
+            height: auto;
+          }
+          .course-list {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 800px;
+            height: auto;
+            margin-left: 3%;
+          }
+          .course-list a{
+            margin-right: 30px; 
+            color: #fff;
+            font-size: 20px;
+            text-decoration: none;
+            text-shadow: 4px 2px 4px rgba(255, 255, 255, 0.8);
           }
         
-        ul {
-            list-style-type: none; /* Remove bullet points from the list */
-            margin: 0; /* Remove default margin */
-            padding: 0; /* Remove default padding */
-           }
-        
-           li {
-            display: inline; /* Display list items horizontally */
-            margin-right: -5px; /* Add spacing between navigation links */
-           }
-        
-          .menu .electronics {
-            font-family: sans-serif;
-            font-size: 17px;
-            position: relative;
-            top: -3px;
-            margin-left: 200px;
-        }
-        li.communications {
-            font-family: sans-serif;
-            font-size: 17px;
-            position: relative;
-            top: -3px;
-            margin-left: 10px;
-        }
-        li.geas {
-            font-family: sans-serif;
-            font-size: 17px;
-            position: relative;
-            margin-left: 10px;
-            top: -3px;
-        }
-        li.math {
-            font-family: sans-serif;
-            font-size: 17px;
-            position: relative;
-            top: -3px;
-            margin-left: 10px;
-        } 
-       
-        
-        li.title-nav {
-            font-family: Arial, sans-serif; /* Set the font family */
-            font-size: 25px; /* Set the font size */
-            font-weight: None; /* Set the font weight */
-        }
-        body {
-                margin: 0;
-            }
-        
-        a {
-            color: #fff; /* Text color of the navigation links */
-            text-decoration: none; /* Remove underline from links */
-        }
-        div.correct-answer{
-            margin-left: 15px;
-            margin-top: 30px;
-            
-        }
         .dropdown {
             display: inline-block;
-            margin: 0 0 0 1125px;
+            margin-left: 10%;
             position: relative;
-            top: -23px
         }
         .dropdown button{
-            background-color: #333;
-            color: #fff;
+            background-color: #000000;
+            color: #ffffff;
             font-family: sans-serif;
-            font-size: 15px;
+            font-size: 17px;
             margin-left: 20px;
             border: none;
             cursor: pointer;
@@ -96,7 +63,6 @@
             display: block;
             color: rgb(22, 21, 21);
             text-decoration: none;
-
         }
 
         .dropdown .content{
@@ -105,7 +71,6 @@
             position: absolute;
             min-width: 120px;
             box-shadow: 2px 2px 5px black
-
         }
         .dropdown:hover .content{
             display: block;
@@ -115,13 +80,6 @@
         
         .dropdown a:hover{
             background-color: gray;
-        }
-        .logo {
-            position: absolute;
-            height: auto;
-            left: 0;
-            width: 170px;
-            margin-top: -17px;
         }
         .menu li{
             display: inline-block;
@@ -143,7 +101,7 @@
             /* justify-content: center; */
             align-items: center;    
             position: relative;
-            margin-left: 30px;
+            margin-left: 0.4%;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
             width: 450px;
             height: 400px;
@@ -160,6 +118,7 @@
             height: 200px;  
 
         }
+     
         .user-section .edit-info{
             position: absolute;
             margin-top: 190px;
@@ -206,6 +165,7 @@
             height: 800px;
         }
         .user_result {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -213,7 +173,7 @@
             height: 100vh; /*100% of the viewport height */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
             width: 700px;
-            height: 500px;
+            height: 400px;
             margin-left: 100px;
         }
 
@@ -222,15 +182,15 @@
         width: 100%; /* Adjust the width as needed */
        }
        
-      .user_result .course-dropdown {
+      .result-nav .course-dropdown {
         position: absolute;
         display: flex;
         flex-direction: row;
         justify-content: flex-end;
-        /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  */
-        width: 500px;
-        height: 50px;
-        margin-top: 450px;
+        box-shadow: 0 0 10px rgba(215, 194, 194, 0.5); 
+        width: auto;
+        height: auto;
+        margin-right: 70%;
        }
        .user_result .dropdown-2 {
             position: relative;
@@ -275,32 +235,53 @@
     .icon {
     font-family: 'YourCustomIconFont', 'Font Awesome', sans-serif; /* Use your custom icon font or Font Awesome */
     /* Additional CSS styles for the icon */
-}
+    }
+    .result-nav {
+        position: absolute;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 50px;
+        margin-top: 50%;
+        /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
+    }
+    .result-nav .back-page {
+        width: auto;
+        height: auto;
+        margin-left: 70%;
+    }
+    .result-nav .next-page {
+        width: auto;
+        height: auto;
+        margin-left: 1%;
+    }
         </style>
      
     
 </head>
 <body>
 
-    <nav>
-        <ul class="menu">
-            <img src="{{url_for('static', filename='logo.png')}}" alt="Example Image" class="logo">
-            <li class="electronics"><a href = "{{url_for('electronics')}}">Electronics</a></li>
-            <li class="communications"><a href = "{{url_for('communications')}}">Communications</a></li>
-            <li class="geas"><a href = "{{url_for('electronics')}}">GEAS</a></li>
-            <li class="math"><a href = "{{url_for('electronics')}}">Math</a></li>
-        </ul>
-
-       <div class="dropdown">
+    <div class="nav-bar">
+        <img src="{{url_for('static', filename='logo.png')}}" alt="Example Image">
+        <div class="course-list">
+            <span>
+                <a href="{{url_for('electronics')}}">Electronics</a>
+                <a href="{{url_for('communications')}}">Communications</a>
+                <a href="{{url_for('electronics')}}">GEAS</a>
+                <a href="{{url_for('electronics')}}">Math</a>
+            </span>
+        </div>  
+        <div class="dropdown">
             <button>Account &#9660;</button>
             <div class="content">
                 <a href="{{url_for('edit_information')}}">Edit Information</a>
                 <a href="{{url_for('edit_password')}}">Change Password</a>
                 <a href="{{url_for('logout')}}">Logout</a>      
             </div>
-       </div>
-        
-    </nav>
+       </div>     
+    </div>
 
     <br>
     <div class="main-section">
@@ -311,7 +292,7 @@
                     <p class="present_user">{{present_user}}</p>
                     <p class="username">@{{username}}</p>
                     <p class="bio">{{bio}}</p>
-                </div>         
+                </div>        
          </div>
          <div class="social-media">
             <p><span class="email-symbol">&#x2709;</span> {{email}}</p>
@@ -356,23 +337,30 @@
             </tbody>
            </table>
       </div>
-      <div class="course-dropdown">
-        <form id="courseForm" action="" method="POST">
-            <div class="dropdown-2">
-                 <button>Course &#9660;</button>
-                 <div class="content-2">
-                     <a href="#" onclick="document.getElementById('courseInput').value = 'Electronics'; document.getElementById('courseForm').submit();">Electronics</a>
-                     <a href="#" onclick="document.getElementById('courseInput').value = 'Communications'; document.getElementById('courseForm').submit();">Communications</a>
-                 </div> 
-            </div>
-            <input type="hidden" id="courseInput" name="course">
-            </form>
+      <div class="result-nav">
+        <div class="course-dropdown">
+            <form id="courseForm" action="" method="POST">
+                <div class="dropdown-2">
+                     <button>Course &#9660;</button>
+                     <div class="content-2">
+                         <a href="#" onclick="document.getElementById('courseInput').value = 'electronics'; document.getElementById('courseForm').submit();">Electronics</a>
+                         <a href="#" onclick="document.getElementById('courseInput').value = 'communications'; document.getElementById('courseForm').submit();">Communications</a>
+                     </div> 
+                </div>
+                <input type="hidden" id="courseInput" name="course">
+                </form>
+          </div>
+          {% if user %}
+          <div class="next-page">
+              {%for page_num in user.iter_pages()%}
+                 {%if page_num %}
+                 <a href="{{url_for('account', course=selected_course, page=page_num)}}">{{page_num}}</a>
+                 {%endif%}
+              {%endfor%}
+          </div> 
+          {%endif%}
       </div>
-    </div>
-
-    
-    
-    
+    </div>   
     </div>
    
   

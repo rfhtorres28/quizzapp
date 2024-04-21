@@ -380,14 +380,20 @@ def account():
     facebook = f'https://www.facebook.com/{current_user.facebook_link}'
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     record = [] 
-
+    next_page = None
+    user = None
+    selected_course = ''
+ 
+    
     if request.method == 'POST':
-         selected_course = request.form['course']
-         user = UserResult.query.filter_by(user_id=current_user.id, subject=selected_course).all()
-         record = [{"subject":result.subject, "score_percentage":result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp":result.timestamp} for result in user]
+         selected_course = request.form.get('course', '')
+         page = request.args.get('page', 1, type=int)
+         user = UserResult.query.filter_by(user_id=current_user.id, subject=selected_course).paginate(page=page, per_page=10)
+         record = [{"subject":result.subject, "score_percentage":result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp":result.timestamp} for result in user.items]
+        
+
          
-         
-    return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio, record=record, instagram=instagram, facebook=facebook, email=email)
+    return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio, record=record, instagram=instagram, facebook=facebook, email=email, user=user, selected_course=selected_course)
 
 
 
@@ -550,6 +556,7 @@ class Electronics(Resource):
             total_questions = len(ece_questions)
             correct_options = []
             correct_option = []
+            answer_content = []
             questions = []
             session_id = secrets.token_hex(16)
             session['sid'] = session_id
@@ -575,6 +582,9 @@ class Electronics(Resource):
 
             for option in correct_options:
                 correct_option.append(option['letter'])
+                
+            for option in correct_options:
+                answer_content.append(option['content'])
             
             for i in range(len(user_response)):
                 if user_response[i] == correct_option[i]:
@@ -584,7 +594,7 @@ class Electronics(Resource):
             score_percentage = no_correct_answer/total_questions*100
             score_percentage = round(score_percentage, 2)
             completion_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            user_result= {"subject":"Electronics", "session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time, "correct_answer":correct_option, "question":questions}
+            user_result= {"subject":"Electronics", "session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time, "correct_answer":answer_content, "question":questions}
 
             if current_user.is_authenticated:
                 session["user_result"] = user_result # store the user_result to the session
@@ -682,12 +692,14 @@ api.add_resource(Communications, '/communications')
 @app.route('/electronics/answers')
 @login_required #Safety feature so that user that is not authenticated cant access the correct answers
 def elecsanswers():
-
+    answer_key = {}
     correct_answers = session["user_result"]["correct_answer"] 
     questions = session["user_result"]["question"]
 
+    for i in range(len(correct_answers)):
+         answer_key[questions[i]] = correct_answers[i] 
    
-    return render_template('elecs_correct_answers.html', correct_answers=correct_answers, questions=questions)
+    return render_template('elecs_answers.html', answer_key=answer_key)
 
 
 
