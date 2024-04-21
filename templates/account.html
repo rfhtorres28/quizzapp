@@ -278,6 +278,7 @@
             <div class="content">
                 <a href="{{url_for('edit_information')}}">Edit Information</a>
                 <a href="{{url_for('edit_password')}}">Change Password</a>
+                <a href="{{url_for('delete_account')}}">Delete Account</a>
                 <a href="{{url_for('logout')}}">Logout</a>      
             </div>
        </div>     
@@ -350,15 +351,16 @@
                 <input type="hidden" id="courseInput" name="course">
                 </form>
           </div>
-          {% if user %}
+          
           <div class="next-page">
+            {% if user %}
               {%for page_num in user.iter_pages()%}
                  {%if page_num %}
-                 <a href="{{url_for('account', course=selected_course, page=page_num)}}">{{page_num}}</a>
+                 <a href="{{url_for('account', page=page_num)}}">{{page_num}}</a>
                  {%endif%}
               {%endfor%}
+              {%endif%}
           </div> 
-          {%endif%}
       </div>
     </div>   
     </div>

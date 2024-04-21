@@ -123,15 +123,12 @@ class UserResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     subject = db.Column(db.String(20))
     user_id = db.Column(db.Integer, db.ForeignKey('userdetails.id'), nullable=False)
+    username = db.Column(db.String(255), db.ForeignKey('userdetails.username'), nullable=False)
     session_id = db.Column(db.String(50), nullable=False)
     score_percentage = db.Column(db.String(5))
     no_correct_answer = db.Column(db.String(5))
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-
-    def __repr__(self):
-
-        return f"UserSession(session_id='{self.session_id}', timestamp='{self.timestamp}')"
 
 
 # Creating Electronics Quiz Form
@@ -169,7 +166,7 @@ opn = CommsOptions.query.all()
 comms_questions = [{"id":question.id, "content":question.content,
                 "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
 
-create_dynamic_fields(comms_questions)
+# create_dynamic_fields(comms_questions)
 
 
 
@@ -380,17 +377,20 @@ def account():
     facebook = f'https://www.facebook.com/{current_user.facebook_link}'
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     record = [] 
-    next_page = None
     user = None
     selected_course = ''
  
     
     if request.method == 'POST':
-         selected_course = request.form.get('course', '')
-         page = request.args.get('page', 1, type=int)
-         user = UserResult.query.filter_by(user_id=current_user.id, subject=selected_course).paginate(page=page, per_page=10)
-         record = [{"subject":result.subject, "score_percentage":result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp":result.timestamp} for result in user.items]
-        
+      selected_course = request.form.get('course', '')
+      session['selected_course'] = selected_course  # Store selected course in session
+    else:
+         selected_course = session.get('selected_course', '')  # Retrieve selected course from session
+
+    page = request.args.get('page', 1, type=int)
+    user = UserResult.query.filter_by(user_id=current_user.id, subject=selected_course).paginate(page=page, per_page=10)
+    record = [{"subject": result.subject, "score_percentage": result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp": result.timestamp} for result in user.items]
+
 
          
     return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio, record=record, instagram=instagram, facebook=facebook, email=email, user=user, selected_course=selected_course)
@@ -479,6 +479,23 @@ def edit_password():
     return render_template("edit_password.html")
 
 
+@app.route('/delete-account', methods=['GET', 'POST'])
+def delete_account():
+    if request.method == 'POST':
+        user_choice = request.form.get('delete_account')
+        user_account= UserDetails.query.filter_by(username=current_user.username).first() # returns the row that has the username=current_user.username
+        user_result = UserResult.query.filter_by(username=current_user.username).all() # return all rows in the database that has username=current_user.username
+        if user_choice: 
+           #loops and delete every row in the user_result
+           for row in user_result:
+                db.session.delete(row)
+                db.session.commit()
+           db.session.delete(user_account)
+           db.session.commit()
+           flash('Account deleted succesfully')
+           return redirect(url_for('login'))
+
+    return render_template('delete_account.html')
 
 
 @app.errorhandler(404)
@@ -572,7 +589,10 @@ class Electronics(Resource):
                             if option["is_correct"]:
                                     correct_options.append(option)
 
-                   
+            if correct_options:  # Check if correct_options is not empty before proceeding
+               for option in correct_options:
+                  correct_option.append(option['letter'])
+                  answer_content.append(option['content'])   
       
 
             filtered_form = {key: value for key, value in request.form.items() if key not in ['user_id', 'csrf_token']}
@@ -580,11 +600,7 @@ class Electronics(Resource):
             for value in filtered_form.values():
                 user_response.append(value)
 
-            for option in correct_options:
-                correct_option.append(option['letter'])
-                
-            for option in correct_options:
-                answer_content.append(option['content'])
+           
             
             for i in range(len(user_response)):
                 if user_response[i] == correct_option[i]:
@@ -597,6 +613,7 @@ class Electronics(Resource):
             user_result= {"subject":"Electronics", "session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time, "correct_answer":answer_content, "question":questions}
 
             if current_user.is_authenticated:
+                username = current_user.username 
                 session["user_result"] = user_result # store the user_result to the session
                 session_user_result = session.get("user_result")
 
@@ -608,7 +625,7 @@ class Electronics(Resource):
                      
             
             if session_id:
-                     new_result = UserResult(user_id=current_user.id, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
+                     new_result = UserResult(user_id=current_user.id, username=username, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
                      db.session.add(new_result)
                      db.session.commit()
 
