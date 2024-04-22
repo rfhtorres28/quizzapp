@@ -7,93 +7,93 @@
     <link rel="stylesheet" href="static/main.css">
 
     <style>
-        body, h1, h2, ol, form, p, label {
-            margin: 5px;
-            padding-left: 6px;
-        }
-        .content-section {
-    max-width: 300px; /* Adjust this value to change the maximum width of the form */
-    margin: 1 auto; /* This will center the form horizontally */
-        }
-        a.register {
-   
-    text-decoration: none; /* Remove underline from anchor tags */
-    font-size: 15px; /* Set the font size */
-    color: #121cd7; /* Set the text color */
-    margin: 10px 0 0 0;
-        }
-        p.error-message {
-            color: #e21313;
-            margin: 5px -3px 4px -5px;
-        }
-      
-        div.container {
-            width: 35%; /* Adjust the width as needed */
-            margin: 0 auto; /* Center the container horizontally */
-            margin-top: 50px;
-            border: 1px solid #ffffff; /* Add a border for the rectangle effect */
-            padding: 20px; /* Add padding for spacing inside the container */
-            box-sizing: border-box; /* Include padding and border in the width */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-            background-color: #ffffff;
-         
-        }
-      h1.login-header{
-        color: #124a83;
-        margin-left: 40px;
-        margin-bottom: 10px;
-        font-weight: normal;
-        font-size: 27px;
-        
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
       }
-      div.image-heading-container{
-       
-       display: flex; /* Use flexbox to arrange items horizontally */
-       align-items: center; /* Center items vertically */
-       }
-       img.centered-image {
-    margin-left: 20px; /* Center the image horizontally */
+     .main-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 400px;
+        height: 370px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);   
         }
-    fieldset.form-group{
-        margin-left: 10px;
-        width: 115%;
-    }
-    div.form-email{
-        width: 100%;
-        
-    }
-    div.login-btn {
-        float: right;
-        margin-right:-80px;
-
-    }
-    a.register{
-      margin-left: 10px;
-    
-    }
-    .logo {
-            margin: 0 auto;
-            width: 210px;
-            height: 120px; 
+     img {
+            width: 200px;
+            height: 150px;
         }
-    .border-bottom{
+    .form-section {
+        margin-top: -30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 400px; /* Adjust the width as needed */
+        height: 300px;
+        }
+    .submit-section {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 300px;
+        height: 50px;
+        margin-right: 100px;
+    }
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    fieldset {
+        width: 300px;
+    }
+    .form-section .submit-section{
+        margin-top: -10px;
+        margin-left: 25%;
+        }
+     .submit-btn {
+        margin-left: 40%;
+     }
+     legend {
         font-size: 20px;
-    }
+     }
+     .form-email {
+        margin-bottom: 5%;
+     }
+
+   .form-email .form-control-email {
+    position: absolute;
+    width: 200px;
+    margin-left: 5.5%;
+   }
+   .form-email .form-control-label {
+    margin-left: 1%;
+    position: absolute;
+
+   }
+   .form-password .form-control-password{
+    width: 200px;
+    margin-left: 1.5%;
+   }
+   a {
+    color: #124ad7;
+   }
    
     </style>
-    
 </head>
 
 <body>
 
     
-    <div class="container">
-      
-        <div class="image-heading-container">
+    <div class="main-section">
             <img src="static\logo.png" alt="Example Image" width="100" height="100" class="logo">
-        </div>
-       
-    <div class="content-section">
+    <div class="form-section">
         <form method="POST" action="">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
@@ -108,7 +108,7 @@
                         {%endfor%}
                     </div>
                     {%else%}
-                        {{ form.email(class="form-control form-control-lg") }} 
+                        {{ form.email(class="form-control-email") }} 
                     {%endif %}
         
                 </div><br>
@@ -123,7 +123,7 @@
                         {%endfor%}
                     </div>
                     {%else%}
-                        {{ form.password(class="form-control form-control-lg") }} 
+                        {{ form.password(class="form-control-password") }} 
                     {%endif %}
         
                 </div>
@@ -135,26 +135,18 @@
 
             </fieldset>
             <br>
-            <div class="login-btn">
-                {{ form.submit(class="btn btn-outline-info") }}
-            </div>
-      
-            {% with messages = get_flashed_messages() %}
-                 {% if messages %}
-                         <p class="error-message">{{ messages[0] }}</p>    
-                 {% endif %}
-            {% endwith %}
-            
-            <div>
-               
+            <div class="submit-section">
                 <a class = "register" href="{{url_for('register')}}">Create an account</a>
-               
+                {{ form.submit(class="submit-btn") }} 
+            <div class="flash-message">
+               {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                         <p class="error-message">{{ messages[0] }}</p>    
+                    {% endif %}
+               {% endwith %}   
+              </div>   
             </div>
-            
-           
         </form>
-
-     
     </div>
 </div>
     

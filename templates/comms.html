@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Electronics Quiz</title>
+  <title>Communication Quiz</title>
   <style>
           body {
             margin: 0;
@@ -74,7 +74,7 @@
 <body>
    <div class="nav-bar">
        <img src="../static/logo.png">
-       <h1>Electronics</h1>
+       <h1>Communications</h1>
        <a href="{{url_for('account')}}">Home</a>
     </div>
     <div class="content-section">
@@ -86,7 +86,7 @@
         {% endif %}
         {% endwith %}
        </div>
-      <form action="/electronics" method="post">
+      <form action="/communications" method="post">
                {{ form.csrf_token }}
                <input type="hidden" name="user_id" value="{{ session.user_id }}">
                <ol type="1">
@@ -95,11 +95,10 @@
                {% if field.name not in ['csrf_token', 'user_id'] %}
   
               <li>
-      
                        <p>{{ field.label.text}}</p>
                {% for option in field.choices %}
                    <label>
-                           <input type="radio" name="{{field.id}}" value="{{ option[0]}}"> <!-- This is for user input letter choice, the field.id is automatically generated -->
+                           <input type="radio" name="{{field.id}}" value="{{option[0]}}"> <!-- This is for user input letter choice, the field.id is automatically generated -->
                                  {{ option[1] }} <!-- This is to display the content of the choices (access the content of the tuple in the question forms)-->
                   </label><br>
                 {% endfor %}
@@ -110,13 +109,11 @@
                        {% endfor %}
                </div>
                {% endif %}
-  
               </li>
                 {% endif %}
                {% endfor %}
       
-               </ol> <br>
-              
+               </ol> <br>      
                <button type="submit" class="submit">Submit Answers</button>
           </form>
           </div>

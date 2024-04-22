@@ -69,8 +69,10 @@
             display: none;
             background-color: rgb(255, 255, 255);
             position: absolute;
-            min-width: 120px;
-            box-shadow: 2px 2px 5px black
+            min-width: 130px;
+            box-shadow: 2px 2px 5px black;
+             z-index: 1; /*ensures that all the elements are also hovered even if there is an element under it */
+
         }
         .dropdown:hover .content{
             display: block;
@@ -345,7 +347,7 @@
                      <button>Course &#9660;</button>
                      <div class="content-2">
                          <a href="#" onclick="document.getElementById('courseInput').value = 'electronics'; document.getElementById('courseForm').submit();">Electronics</a>
-                         <a href="#" onclick="document.getElementById('courseInput').value = 'communications'; document.getElementById('courseForm').submit();">Communications</a>
+                         <a href="#" onclick="document.getElementById('courseInput').value = 'communication'; document.getElementById('courseForm').submit();">Communications</a>
                      </div> 
                 </div>
                 <input type="hidden" id="courseInput" name="course">

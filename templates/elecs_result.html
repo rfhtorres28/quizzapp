@@ -3,109 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Results</title>
+    <title>Electronics Results</title>
     <link rel="stylesheet" href="static/main.css">
     <style>
- 
-        nav {
-          background-color: #333; /* Background color of the navigation bar */
-              color: #fff; /* Text color of the navigation links */
-              padding: 10px; /* Padding around the navigation links */
-              display: flex; /* Use flexbox for layout */
-              justify-content: flex-start; /* Space items evenly along the main axis */
-              align-items: center; /* Center items along the cross axis */
-          }
-          ul {
-              list-style-type: none; /* Remove bullet points from the list */
-              margin: 0; /* Remove default margin */
-              padding: 0; /* Remove default padding */
-          }
-             
-          li {
-              display: inline; /* Display list items horizontally */
-              margin-right: 30px; /* Add spacing between navigation links */
-          }
-          li.title {
-              font-family: Arial, sans-serif; /* Set the font family */
-              font-size: 25px; /* Set the font size */
-              font-weight: None; /* Set the font weight */         
-          }   
-          body {
-              margin: 0;
-          }               
-          li.back-to-home {
-              font-size: 16px;
-              position: relative;
-              top: -3px
-          }
-          li.logout  {
-                  font-size: 16px;
-                  position: relative;
-                  top: -3px;
-                  left: 1000px;
-          }
-          a {
-              color:#fff;
-              text-decoration: none;
-          }
-        h1.course{
-          position: relative;
-          left: 25px;
-  
+  body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        h2.instructions{
-          position: relative;
-          left: 25px;
-         
+        .nav-bar {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            height: 80px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  
+            background-color: black;
         }
-        div.section{
-          position: relative;
-          left: -15px;
-          top: 10px;
+       .nav-bar img {
+            width: 170px;
+            height: auto;
         }
-        button.submit{
-          position: relative;
-          left: 40px;
+        .nav-bar h1 {
+            color: white;
+            margin-left: 27%;
+            font-weight: normal;
+            font-size: 27px;
+            text-shadow: 4px 2px 4px rgba(255, 255, 255, 0.8);
         }
-        h1.result{
-        position: relative;
-        left: 25px;
-        font-size: 25px;
-        color: red;
-        font-weight: normal;
-
-      }
-    
-      button.restart-test{
-        position: relative;
-        left: 25px;
-      }
-      button.correct-answer{
-        position: relative;
-        left: 25px;
-      }
-      div.invalid-feedback{
-        color:red
-      }
+        .nav-bar a {
+            margin-left: 40%;
+            font-size: 20px;
+            color: white;
+            text-decoration: none;
+        }
+        .nav-bar a:hover {
+            color: rgb(8, 90, 255);
+        }
+        .content-section {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  
+          width: 70%;
+          height: 90%;
+          margin-top: 2%;
+          margin-bottom: 3%;
+        }
+        .content-section ol {
+            margin-top: 1%;
+        }
+        .content-section form {
+          margin-left: -7%;
+        }
+        .result {
+            color: red;
+        }
+        .content-section .restart-test {
+            margin-top: -5%;
+        }
       
       </style>
     
 </head>
 
 <body>
-    <nav>
-        <ul>
-      
-            <li class="title">ECEBix</li>
-            <li class="back-to-home"><a href = "{{url_for('home')}}">Home</a></li>
-            <li class="logout"><a href = "{{url_for('logout')}}">Logout</a></li>
-           
-        </ul>
-
-    </nav>
+    <div class="nav-bar">
+        <img src="../static/logo.png">
+        <h1>Answer History</h1>
+        <a href="{{url_for('account')}}">Home</a>
+    </div>  
+    <div class="content-section">
     <h1 class="result">Your score is {{no_correct_answer}} out of {{total_questions}}, {{score_percentage}}%</h1>
-  
-   <div class="section">
    <ol type="1">
         {% for field in form %}
             {% if field.name not in ['csrf_token', 'user_id'] %}
@@ -117,22 +88,15 @@
                             {{ option[1] }}
                         </label><br>
                     {% endfor %}
-                    {% if field.errors %}
-                        <div class="invalid-feedback">
-                            {% for error in field.errors %}
-                               <p> <span>{{ error }}</span></p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
                 </p>
             {% endif %}
         {% endfor %}
     </ol>
-    </div>
-    
-    
     <br>
     <button type="button" onclick="window.location.href = '{{url_for('electronics')}}';" class="restart-test">Restart the Test</button>
    <p> <button type="button" onclick="window.location.href = '{{url_for('elecsanswers')}}';" class="correct-answer">Correct Answers</button></p>
+    </div>
+    
+
 </body>
 </html>

@@ -137,11 +137,11 @@ class QuizForm(FlaskForm):
     user_id = HiddenField()
 
 
-
 qn = ElecsQuestions.query.all()
 opn = ElecsOptions.query.all()
 ece_questions = [{"id":question.id, "content":question.content,
-                 "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
+                "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
+
 
 
 
@@ -150,23 +150,12 @@ ece_questions = [{"id":question.id, "content":question.content,
 class CommsQuizForm(FlaskForm):
     user_id = HiddenField()
 
-def create_dynamic_fields(questions):
-    
-    
-    for i, question in enumerate(questions, start=1):
-        choices = [(option['letter'], option['content']) for option in question['options']] # a list of tuples, elements can be access same as a list
-        field_name = f'Question {i}.'
-        field_label = question['content']
-        setattr(CommsQuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
-
-
 
 qn = CommsQuestions.query.all()
 opn = CommsOptions.query.all()
 comms_questions = [{"id":question.id, "content":question.content,
                 "options":[{"question_no":question.id, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
 
-# create_dynamic_fields(comms_questions)
 
 
 
@@ -211,7 +200,6 @@ class ProfileForm(FlaskForm):
     bio = StringField('Bio')
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Finish')
-
 
 
  
@@ -508,6 +496,7 @@ def page_not_found(error):
 
 field_labels = {}
 
+
 # Creating API Resource for Electronics Questions 
 class Electronics(Resource):
    
@@ -577,6 +566,7 @@ class Electronics(Resource):
             questions = []
             session_id = secrets.token_hex(16)
             session['sid'] = session_id
+            messages = get_flashed_messages()
 
             for question in field_labels.values():
                  questions.append(question)
@@ -628,10 +618,14 @@ class Electronics(Resource):
                      new_result = UserResult(user_id=current_user.id, username=username, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
                      db.session.add(new_result)
                      db.session.commit()
-
-
-            return make_response(render_template('elecs_result.html', form=form, score_percentage=score_percentage,
-                   no_correct_answer=no_correct_answer, total_questions=total_questions))    
+            
+           
+            if form.validate():
+                 return make_response(render_template('elecs_result.html', form=form, score_percentage=score_percentage,
+                        no_correct_answer=no_correct_answer, total_questions=total_questions, messages=messages))   
+            else:
+               flash('Complete answering the questions')
+               return redirect(url_for('electronics')) 
          
    
 
@@ -639,46 +633,108 @@ class Electronics(Resource):
 # Creating API Resource for Communications Questions 
 class Communications(Resource):
    
+   
    @login_required
    def get(self):
        if not current_user.is_authenticated:
             return redirect(url_for('login'))
        
+       def create_dynamic_fields(questions):
+         
+         random.shuffle(questions)
+         for i, question in enumerate(questions, start=1):
+            choices = [(option['letter'], option['content']) for option in question['options']] # a list of tuples, elements can be access same as a list
+            field_name = f'Question {i}'
+            field_label = question['content']
+            setattr(CommsQuizForm, field_name, RadioField(field_label, choices=choices, validators=[InputRequired()]))
+            field_labels[field_name] = field_label
+         
+
+       create_dynamic_fields(comms_questions)
+       
        form = CommsQuizForm() 
-       return make_response(render_template('commsquiz.html', questions=comms_questions, form=form))
+       return make_response(render_template('commsquiz.html', form=form))
        
    
    def post(self):
+            global field_labels
+            # Fetching new electronics questions from the administrator     
+            if request.data:
+                 data = request.json
+                 totalquestions = CommsQuestions.query.count()
+                 question = data.get('content')
+                 options = data.get('options')
+
+                 if question:
+                    question_id = totalquestions + 1
+                    new_question = CommsQuestions(id=question_id, content=question) 
+                    db.session.add(new_question)
+                    db.session.commit()
+
+                    if options:  
+                      id = CommsOptions.query.count()  
+                      question_no = totalquestions + 1     
+                      for option_data in options:    
+                             id += 1
+                             letter = option_data['letter']
+                             content = option_data['content']
+                             is_correct = option_data['is_correct']
+                             new_option = CommsOptions(id=id, question_no=question_no, letter=letter, content=content, is_correct=is_correct)
+                             db.session.add(new_option)
+                             db.session.commit()
+
             
-            form = CommsQuizForm() 
+
+                 return jsonify({"message":"Question added succesfully"})
+                              
+
+            form = QuizForm() 
             no_correct_answer = 0
-            correct_answers = []
+            user_response = []
             total_questions = len(comms_questions)
-            user_responses = {}
-            form_data = {}
-            user_result = {}
+            correct_options = []
+            correct_option = []
+            answer_content = []
+            questions = []
             session_id = secrets.token_hex(16)
             session['sid'] = session_id
+            messages = get_flashed_messages()
 
-           
-            if form.validate_on_submit():
-                form_data = request.form.to_dict()  
-    
-            for question in comms_questions: 
-                user_response = form_data.get(f'Question {question["id"]}.') 
-                correct_response = [x for x in question['options'] if x['is_correct']==True] 
-                correct_answers.append(correct_response) 
-                user_responses[f'Question {question["id"]}'] = user_response
-                if user_response == correct_response[0]["letter"]:
+            for question in field_labels.values():
+                 questions.append(question)
+
+            # Checking if whether the user response is correct or not, request.form-> user answers, 
+            for form_question in field_labels.values():
+                for comms_question in comms_questions:
+                    if comms_question["content"] == form_question:
+                        for option in comms_question["options"]:
+                            if option["is_correct"]:
+                                    correct_options.append(option)
+
+            if correct_options:  # Check if correct_options is not empty before proceeding
+               for option in correct_options:
+                  correct_option.append(option['letter'])
+                  answer_content.append(option['content'])   
+      
+
+            filtered_form = {key: value for key, value in request.form.items() if key not in ['user_id', 'csrf_token']}
+
+            for value in filtered_form.values():
+                user_response.append(value)
+
+            
+            for i in range(len(user_response)):
+                if user_response[i] == correct_option[i]:
                     no_correct_answer += 1
 
             session_id = session.get('sid')
             score_percentage = no_correct_answer/total_questions*100
             score_percentage = round(score_percentage, 2)
             completion_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            user_result= {"subject":"Communications", "session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time}
+            user_result= {"subject":"Communication", "session_id":session_id, "score_percentage":score_percentage, "no_correct_answer":no_correct_answer, "timestamp":completion_time, "correct_answer":answer_content, "question":questions}
 
             if current_user.is_authenticated:
+                username = current_user.username 
                 session["user_result"] = user_result # store the user_result to the session
                 session_user_result = session.get("user_result")
 
@@ -687,15 +743,20 @@ class Communications(Resource):
                      no_correct_answer = session_user_result["no_correct_answer"]
                      timestamp = session_user_result["timestamp"]
                      subject = session_user_result["subject"]
-                
+                     
+            
             if session_id:
-                     new_result = UserResult(user_id=current_user.id, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
+                     new_result = UserResult(user_id=current_user.id, username=username, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
                      db.session.add(new_result)
                      db.session.commit()
-
-
-            return make_response(render_template('comms_result.html', form=form, score_percentage=score_percentage,
-                   no_correct_answer=no_correct_answer, total_questions=total_questions, correct_answers=correct_answers))  
+            
+           
+            if form.validate():
+                 return make_response(render_template('comms_result.html', form=form, score_percentage=score_percentage,
+                        no_correct_answer=no_correct_answer, total_questions=total_questions, messages=messages))   
+            else:
+               flash('Complete answering the questions')
+               return redirect(url_for('communications')) 
        
 
 
@@ -723,17 +784,15 @@ def elecsanswers():
 @app.route('/communications/answers')
 @login_required #Safety feature so that user that is not authenticated cant access the correct answers
 def commsanswers():
-    correct_answers = []
-    
-    if current_user.is_authenticated:
-        for question in comms_questions:
-            correct_response = [x for x in question['options'] if x['is_correct']==True] 
-            correct_answers.append(correct_response)  
+    answer_key = {}
+    correct_answers = session["user_result"]["correct_answer"] 
+    questions = session["user_result"]["question"]
+
+    for i in range(len(correct_answers)):
+         answer_key[questions[i]] = correct_answers[i] 
+   
+    return render_template('comms_answers.html', answer_key=answer_key)
              
-      
-
-    return render_template('comms_correct_answers.html', correct_answers=correct_answers)
-
 
 
 
