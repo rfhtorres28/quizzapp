@@ -64,7 +64,11 @@
         font-size: 20px;
      }
      .form-email {
-        margin-bottom: 5%;
+        display: flex;
+        flex-direction: column;
+        width: 300px;
+        height: 50px;  
+        margin-bottom: -8%;
      }
 
    .form-email .form-control-email {
@@ -84,7 +88,23 @@
    a {
     color: #124ad7;
    }
-   
+   .flash-message {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 300px;
+    height: 30px;
+   }
+   .error-message {
+    color: red;
+   }
+   .invalid-feedback {
+    margin-top: 8%;
+    margin-left: 25%;
+    color: red;
+   }
+
     </style>
 </head>
 
@@ -99,33 +119,24 @@
             <fieldset class="form-group">
                 <legend class="border-bottom">Login your account</legend>
                 <div class="form-email">
-                    {{ form.email.label(class="form-control-label") }}
+                    {{ form.email.label(class="form-control-label") }}  {{ form.email(class="form-control-email") }} 
                     {% if form.email.errors %}
-                    {{ form.email(class="form-control form-control-lg is-invalid") }}
                     <div class = "invalid-feedback">
                         {%for error in form.email.errors %}
                          <span> {{error}}</span>       
                         {%endfor%}
                     </div>
-                    {%else%}
-                        {{ form.email(class="form-control-email") }} 
                     {%endif %}
-        
                 </div><br>
                 <div class="form-password">
-                    {{ form.password.label(class="form-control-label") }}
-
+                    {{ form.password.label(class="form-control-label") }} {{ form.password(class="form-control-password") }} 
                     {% if form.password.errors %}
-                    {{ form.password(class="form-control form-control-lg is-invalid") }}
                     <div class = "invalid-feedback">
                         {%for error in form.password.errors %}
                          <span> {{error}}</span>       
                         {%endfor%}
                     </div>
-                    {%else%}
-                        {{ form.password(class="form-control-password") }} 
                     {%endif %}
-        
                 </div>
                 <br>
                 <div class="form-check">
@@ -137,15 +148,18 @@
             <br>
             <div class="submit-section">
                 <a class = "register" href="{{url_for('register')}}">Create an account</a>
-                {{ form.submit(class="submit-btn") }} 
-            <div class="flash-message">
-               {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                         <p class="error-message">{{ messages[0] }}</p>    
-                    {% endif %}
-               {% endwith %}   
-              </div>   
+                {{ form.submit(class="submit-btn") }}   
             </div>
+            <div class="flash-message">
+                {% with messages = get_flashed_messages() %}
+                     {% if messages %}
+                          <p class="error-message">{{ messages[0] }}</p>    
+                          {%for error in form.email.errors %}
+                         <span> {{error}}</span>       
+                           {%endfor%}
+                     {% endif %}
+                {% endwith %}   
+            </div> 
         </form>
     </div>
 </div>

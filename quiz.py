@@ -14,14 +14,17 @@ import secrets
 import os 
 from datetime import datetime
 import random
+from flask_socketio import SocketIO, send, emit
+from sqlalchemy.ext.hybrid import hybrid_property
 
 #-----Initializing the flask app-------#
         
 app = Flask(__name__)
 api = Api(app)
-app.config['SECRET_KEY'] = '582ea1bb8309ccf43fd65b39d593a6a6'
 app.secret_key = 'Tootsie@2714'
 bcrypt = Bcrypt(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 
 #------ configuring the database -------#
@@ -127,8 +130,12 @@ class UserResult(db.Model):
     session_id = db.Column(db.String(50), nullable=False)
     score_percentage = db.Column(db.String(5))
     no_correct_answer = db.Column(db.String(5))
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    posted_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    latest_login = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
 
+    @hybrid_property
+    def time_difference(self):
+        return self.latest_login - self.posted_time
 
 
 # Creating Electronics Quiz Form
@@ -198,7 +205,7 @@ class ProfileForm(FlaskForm):
     facebook_username = StringField('Facebook', validators=[DataRequired()])
     date_of_birth = DateField('Date of Birth')
     bio = StringField('Bio')
-    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
+    picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Finish')
 
 
@@ -377,7 +384,7 @@ def account():
 
     page = request.args.get('page', 1, type=int)
     user = UserResult.query.filter_by(user_id=current_user.id, subject=selected_course).paginate(page=page, per_page=10)
-    record = [{"subject": result.subject, "score_percentage": result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp": result.timestamp} for result in user.items]
+    record = [{"subject": result.subject, "score_percentage": result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp": result.posted_time} for result in user.items]
 
 
          
@@ -567,6 +574,7 @@ class Electronics(Resource):
             session_id = secrets.token_hex(16)
             session['sid'] = session_id
             messages = get_flashed_messages()
+            global session_user_result
 
             for question in field_labels.values():
                  questions.append(question)
@@ -607,6 +615,7 @@ class Electronics(Resource):
                 session["user_result"] = user_result # store the user_result to the session
                 session_user_result = session.get("user_result")
 
+
             if session_user_result:
                      score_percentage = session_user_result["score_percentage"]
                      no_correct_answer = session_user_result["no_correct_answer"]
@@ -615,20 +624,52 @@ class Electronics(Resource):
                      
             
             if session_id:
-                     new_result = UserResult(user_id=current_user.id, username=username, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
+                     new_result = UserResult(user_id=current_user.id, username=username, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, posted_time=timestamp)
                      db.session.add(new_result)
                      db.session.commit()
             
            
-            if form.validate():
+            if form.validate_on_submit(): # this also returns a POST request 
+                 
                  return make_response(render_template('elecs_result.html', form=form, score_percentage=score_percentage,
-                        no_correct_answer=no_correct_answer, total_questions=total_questions, messages=messages))   
+                        no_correct_answer=no_correct_answer, total_questions=total_questions, messages=messages))
+            
             else:
                flash('Complete answering the questions')
                return redirect(url_for('electronics')) 
-         
-   
+            
 
+
+@app.route("/quizfeed", methods=["GET"])
+@login_required
+def quizfeed():
+  
+
+    result_list = []
+    user = UserResult.query.order_by(UserResult.posted_time.desc()).all()
+    if user is None: 
+        message = "No user result found"
+
+    else: 
+        result_list = [{"username":result.username, "subject":result.subject, "score_pct":result.score_percentage, "timestamp":result.posted_time, "difference":result.time_difference} for result in user]
+        message = None
+        print(result_list)
+        # Updated the latest_login column everytime quizfeed route load
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
+        for row in user:
+            row.latest_login = current_time
+            db.session.commit()
+
+    return render_template('quizfeed.html', result_list=result_list, message=message)
+
+
+
+
+# @socketio.on("message")
+# def handle_message(message):
+#     if message == "Data received":
+#         print("Data Received")
+  
    
 # Creating API Resource for Communications Questions 
 class Communications(Resource):
@@ -746,7 +787,7 @@ class Communications(Resource):
                      
             
             if session_id:
-                     new_result = UserResult(user_id=current_user.id, username=username, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, timestamp=timestamp)
+                     new_result = UserResult(user_id=current_user.id, username=username, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, posted_time=timestamp)
                      db.session.add(new_result)
                      db.session.commit()
             
@@ -792,12 +833,12 @@ def commsanswers():
          answer_key[questions[i]] = correct_answers[i] 
    
     return render_template('comms_answers.html', answer_key=answer_key)
-             
 
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+if __name__ == "__main__": 
+    socketio.run(app, debug=True, host="localhost")
 
 
 # render_template typically returns an html string so use make_response() to ensure 
