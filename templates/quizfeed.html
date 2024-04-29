@@ -9,34 +9,93 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-        .quiz-post {
-            display: flex;
-            flex-direction: column;
             justify-content: center;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  
-            width: 300px;
-            height: 100px;
-            margin-top: 2%;
-            text-align: center;
         }
+
+
+.fixed-element {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);  
+  position: fixed;
+  top: 2%;
+  left: 2%;
+  bottom: 2%;
+  width: 300px;
+  height: 500px;
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Add a shadow effect for better visibility */
+  z-index: 1000; /* Ensure the fixed element appears above other content */
+}
+
+.scrollable-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);  
+  margin-top: 1%; /* Adjust this value to avoid content overlapping with the fixed element */
+  margin-left: -120px;
+  padding: 20px;
+  overflow-y: auto; /* Enable vertical scrolling for the scrollable portion */
+  width: 600px;
+  height: 1050px;
+}
+.quiz-post {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);  
+    margin-bottom: 1%;
+    width: 450px;
+    height: 300px;
+    margin-top: 2%;
+    padding: 4%;
+}
+.quiz-post img {
+
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+    margin-right: 3%;
+    margin-left: -22%;
+}
+.post-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+    width: 400px;
+    height: 50px;
+}
     </style>
 </head>
 <body>
 
-    <tbody>
-        {%if result_list%}
-         {%for result in result_list%}
-        <div class="quiz-post">
-           <span>{{result['username']}} answer {{result['subject']}} quiz</span> <br>
-           <span>Score: {{result['score_pct']}}%</span> 
-           <span>Posted: {{result['difference']}} ago</span>
+    <div class="container">
+        <div class="fixed-element">
+         
         </div>
-        {%endfor%}
-        {%endif%}
-    </tbody>
-    {%if message%}
-        <p>{{message}}</p>
-    {%endif%}
+        <div class="scrollable-content">
+            <span></span>
+                {%if result_list%}
+                 {%for result in result_list%}
+                <div class="quiz-post">
+                    <div class = "post-header">
+                        <img src="{{result['user_pic']}}" alt="Example Image" class="user_profile_image" width="50px" height="50px">
+                        <span>{{result['username']}} answer {{result['subject']}} quiz</span> <br>
+                    </div>
+                    
+                   <span>Score: {{result['score_pct']}}%</span> 
+                   <span>Posted: {{result['difference']}} ago</span>
+                </div>
+                {%endfor%}
+                {%endif%}
+     
+            {%if message%}
+                <p>{{message}}</p>
+            {%endif%}
+        </div>
+    
 </body>
 </html>

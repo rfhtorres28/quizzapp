@@ -4,7 +4,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import current_user, LoginManager, login_user, logout_user, login_required 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitField, BooleanField, DateField
+from wtforms import RadioField, HiddenField, StringField, PasswordField, SubmitField, BooleanField, DateField, SelectField
 from wtforms.validators import InputRequired, DataRequired, Length, Email, EqualTo, ValidationError
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -12,10 +12,11 @@ from sqlalchemy import UnicodeText
 from email_validator import validate_email, EmailNotValidError
 import secrets
 import os 
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 from flask_socketio import SocketIO, send, emit
 from sqlalchemy.ext.hybrid import hybrid_property
+
 
 #-----Initializing the flask app-------#
         
@@ -55,6 +56,7 @@ class UserDetails(db.Model, UserMixin):
     email = db.Column(db.String(255), unique = True)
     password = db.Column(db.String(255), unique = True)
     date_of_birth = db.Column(db.Date)
+    country = db.Column(db.String(255))
     gender = db.Column(db.String(10))
     instagram_link = db.Column(db.String(255))
     facebook_link = db.Column(db.String(255))
@@ -132,6 +134,7 @@ class UserResult(db.Model):
     no_correct_answer = db.Column(db.String(5))
     posted_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     latest_login = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
+    profile_pic = db.Column(db.String(255), nullable=True)
 
     @hybrid_property
     def time_difference(self):
@@ -197,6 +200,34 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Email already exists. Please choose other email')
 
 
+countries = [
+    ("AF", "Afghanistan"), ("AL", "Albania"), ("DZ", "Algeria"), ("AS", "American Samoa"), ("AD", "Andorra"), ("AO", "Angola"), ("AI", "Anguilla"), ("AQ", "Antarctica"), ("AG", "Antigua and Barbuda"), ("AR", "Argentina"),
+    ("AM", "Armenia"), ("AW", "Aruba"), ("AU", "Australia"), ("AT", "Austria"), ("AZ", "Azerbaijan"), ("BS", "Bahamas"), ("BH", "Bahrain"), ("BD", "Bangladesh"), ("BB", "Barbados"), ("BY", "Belarus"),
+    ("BE", "Belgium"), ("BZ", "Belize"), ("BJ", "Benin"), ("BM", "Bermuda"), ("BT", "Bhutan"), ("BO", "Bolivia"), ("BA", "Bosnia and Herzegovina"), ("BW", "Botswana"), ("BV", "Bouvet Island"), ("BR", "Brazil"),
+    ("IO", "British Indian Ocean Territory"), ("BN", "Brunei Darussalam"), ("BG", "Bulgaria"), ("BF", "Burkina Faso"), ("BI", "Burundi"), ("KH", "Cambodia"), ("CM", "Cameroon"), ("CA", "Canada"), ("CV", "Cape Verde"), ("KY", "Cayman Islands"),
+    ("CF", "Central African Republic"), ("TD", "Chad"), ("CL", "Chile"), ("CN", "China"), ("CX", "Christmas Island"), ("CC", "Cocos (Keeling) Islands"), ("CO", "Colombia"), ("KM", "Comoros"), ("CG", "Congo"), ("CD", "Congo, the Democratic Republic of the"),
+    ("CK", "Cook Islands"), ("CR", "Costa Rica"), ("CI", "Cote D'Ivoire"), ("HR", "Croatia"), ("CU", "Cuba"), ("CY", "Cyprus"), ("CZ", "Czech Republic"), ("DK", "Denmark"), ("DJ", "Djibouti"), ("DM", "Dominica"),
+    ("DO", "Dominican Republic"), ("EC", "Ecuador"), ("EG", "Egypt"), ("SV", "El Salvador"), ("GQ", "Equatorial Guinea"), ("ER", "Eritrea"), ("EE", "Estonia"), ("ET", "Ethiopia"), ("FK", "Falkland Islands (Malvinas)"), ("FO", "Faroe Islands"),
+    ("FJ", "Fiji"), ("FI", "Finland"), ("FR", "France"), ("GF", "French Guiana"), ("PF", "French Polynesia"), ("TF", "French Southern Territories"), ("GA", "Gabon"), ("GM", "Gambia"), ("GE", "Georgia"), ("DE", "Germany"),
+    ("GH", "Ghana"), ("GI", "Gibraltar"), ("GR", "Greece"), ("GL", "Greenland"), ("GD", "Grenada"), ("GP", "Guadeloupe"), ("GU", "Guam"), ("GT", "Guatemala"), ("GN", "Guinea"), ("GW", "Guinea-Bissau"),
+    ("GY", "Guyana"), ("HT", "Haiti"), ("HM", "Heard Island and Mcdonald Islands"), ("VA", "Holy See (Vatican City State)"), ("HN", "Honduras"), ("HK", "Hong Kong"), ("HU", "Hungary"), ("IS", "Iceland"), ("IN", "India"),
+    ("ID", "Indonesia"), ("IR", "Iran, Islamic Republic of"), ("IQ", "Iraq"), ("IE", "Ireland"), ("IL", "Israel"), ("IT", "Italy"), ("JM", "Jamaica"), ("JP", "Japan"), ("JO", "Jordan"), ("KZ", "Kazakhstan"),
+    ("KE", "Kenya"), ("KI", "Kiribati"), ("KP", "Korea, Democratic People's Republic of"), ("KR", "Korea, Republic of"), ("KW", "Kuwait"), ("KG", "Kyrgyzstan"), ("LA", "Lao People's Democratic Republic"), ("LV", "Latvia"), ("LB", "Lebanon"),
+    ("LS", "Lesotho"), ("LR", "Liberia"), ("LY", "Libyan Arab Jamahiriya"), ("LI", "Liechtenstein"), ("LT", "Lithuania"), ("LU", "Luxembourg"), ("MO", "Macao"), ("MK", "Macedonia, the Former Yugoslav Republic of"), ("MG", "Madagascar"),
+    ("MW", "Malawi"), ("MY", "Malaysia"), ("MV", "Maldives"), ("ML", "Mali"), ("MT", "Malta"), ("MH", "Marshall Islands"), ("MQ", "Martinique"), ("MR", "Mauritania"), ("MU", "Mauritius"), ("YT", "Mayotte"),
+    ("MX", "Mexico"), ("FM", "Micronesia, Federated States of"), ("MD", "Moldova, Republic of"), ("MC", "Monaco"), ("MN", "Mongolia"), ("MS", "Montserrat"), ("MA", "Morocco"), ("MZ", "Mozambique"), ("MM", "Myanmar"),
+    ("NA", "Namibia"), ("NR", "Nauru"), ("NP", "Nepal"), ("NL", "Netherlands"), ("AN", "Netherlands Antilles"), ("NC", "New Caledonia"), ("NZ", "New Zealand"), ("NI", "Nicaragua"), ("NE", "Niger"), ("NG", "Nigeria"),
+    ("NU", "Niue"), ("NF", "Norfolk Island"), ("MP", "Northern Mariana Islands"), ("NO", "Norway"), ("OM", "Oman"), ("PK", "Pakistan"), ("PW", "Palau"), ("PS", "Palestinian Territory, Occupied"), ("PA", "Panama"), ("PG", "Papua New Guinea"),
+    ("PY", "Paraguay"), ("PE", "Peru"), ("PH", "Philippines"), ("PN", "Pitcairn"), ("PL", "Poland"), ("PT", "Portugal"), ("PR", "Puerto Rico"), ("QA", "Qatar"), ("RE", "Reunion"), ("RO", "Romania"), ("RU", "Russian Federation"),
+    ("RW", "Rwanda"), ("SH", "Saint Helena"), ("KN", "Saint Kitts and Nevis"), ("LC", "Saint Lucia"), ("PM", "Saint Pierre and Miquelon"), ("VC", "Saint Vincent and the Grenadines"), ("WS", "Samoa"), ("SM", "San Marino"), ("ST", "Sao Tome and Principe"),
+    ("SA", "Saudi Arabia"), ("SN", "Senegal"), ("CS", "Serbia and Montenegro"), ("SC", "Seychelles"), ("SL", "Sierra Leone"), ("SG", "Singapore"), ("SK", "Slovakia"), ("SI", "Slovenia"), ("SB", "Solomon Islands"), ("SO", "Somalia"),
+    ("ZA", "South Africa"), ("GS", "South Georgia and the South Sandwich Islands"), ("ES", "Spain"), ("LK", "Sri Lanka"), ("SD", "Sudan"), ("SR", "Suriname"), ("SJ", "Svalbard and Jan Mayen"), ("SZ", "Swaziland"), ("SE", "Sweden"),
+    ("CH", "Switzerland"), ("SY", "Syrian Arab Republic"), ("TW", "Taiwan, Province of China"), ("TJ", "Tajikistan"), ("TZ", "Tanzania, United Republic of"), ("TH", "Thailand"), ("TL", "Timor-Leste"), ("TG", "Togo"), ("TK", "Tokelau"),
+    ("TO", "Tonga"), ("TT", "Trinidad and Tobago"), ("TN", "Tunisia"), ("TR", "Turkey"), ("TM", "Turkmenistan"), ("TC", "Turks and Caicos Islands"), ("TV", "Tuvalu"), ("UG", "Uganda"), ("UA", "Ukraine"), ("AE", "United Arab Emirates"),
+    ("GB", "United Kingdom"), ("US", "United States"), ("UM", "United States Minor Outlying Islands"), ("UY", "Uruguay"), ("UZ", "Uzbekistan"), ("VU", "Vanuatu"), ("VE", "Venezuela"), ("VN", "Viet Nam"), ("VG", "Virgin Islands, British"),
+    ("VI", "Virgin Islands, U.s."), ("WF", "Wallis and Futuna"), ("EH", "Western Sahara"), ("YE", "Yemen"), ("ZM", "Zambia"), ("ZW", "Zimbabwe")]
+
+
 
 class ProfileForm(FlaskForm):
 
@@ -205,6 +236,7 @@ class ProfileForm(FlaskForm):
     facebook_username = StringField('Facebook', validators=[DataRequired()])
     date_of_birth = DateField('Date of Birth')
     bio = StringField('Bio')
+    country = SelectField('Country', choices=countries)
     picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Finish')
 
@@ -322,6 +354,7 @@ def profile():
                    
                    # Update user profile with profile form data
                    user.date_of_birth = form.date_of_birth.data
+                   user.country = form.country.data
                    user.gender = form.gender.data
                    user.instagram_link = form.instagram_username.data
                    user.facebook_link = form.facebook_username.data
@@ -370,7 +403,7 @@ def account():
     email = current_user.email
     instagram = f'https://www.instagram.com/{current_user.instagram_link}'
     facebook = f'https://www.facebook.com/{current_user.facebook_link}'
-    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    image_file = url_for('static', filename='../static/profile_pics/' + current_user.image_file)
     record = [] 
     user = None
     selected_course = ''
@@ -630,7 +663,11 @@ class Electronics(Resource):
             
            
             if form.validate_on_submit(): # this also returns a POST request 
-                 
+                 image_file = url_for('static', filename='../static/profile_pics/' + current_user.image_file)
+                 user = UserResult.query.filter_by(session_id=session_user_result["session_id"]).first()
+                 if user:
+                     user.profile_pic = image_file
+                     db.session.commit()
                  return make_response(render_template('elecs_result.html', form=form, score_percentage=score_percentage,
                         no_correct_answer=no_correct_answer, total_questions=total_questions, messages=messages))
             
@@ -643,15 +680,15 @@ class Electronics(Resource):
 @app.route("/quizfeed", methods=["GET"])
 @login_required
 def quizfeed():
-  
-
+    
+    
     result_list = []
     user = UserResult.query.order_by(UserResult.posted_time.desc()).all()
     if user is None: 
         message = "No user result found"
 
     else: 
-        result_list = [{"username":result.username, "subject":result.subject, "score_pct":result.score_percentage, "timestamp":result.posted_time, "difference":result.time_difference} for result in user]
+        result_list = [{"username":result.username, "subject":result.subject, "score_pct":result.score_percentage, "timestamp":result.posted_time, "difference":result.time_difference, "user_pic":result.profile_pic} for result in user]
         message = None
         print(result_list)
         # Updated the latest_login column everytime quizfeed route load
@@ -659,7 +696,7 @@ def quizfeed():
         for row in user:
             row.latest_login = current_time
             db.session.commit()
-
+   
     return render_template('quizfeed.html', result_list=result_list, message=message)
 
 
