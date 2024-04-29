@@ -135,6 +135,7 @@ class UserResult(db.Model):
     posted_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     latest_login = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
     profile_pic = db.Column(db.String(255), nullable=True)
+    difference = db.Column(db.String(255), nullable=True)
 
     @hybrid_property
     def time_difference(self):
@@ -688,14 +689,42 @@ def quizfeed():
         message = "No user result found"
 
     else: 
-        result_list = [{"username":result.username, "subject":result.subject, "score_pct":result.score_percentage, "timestamp":result.posted_time, "difference":result.time_difference, "user_pic":result.profile_pic} for result in user]
+        result_list = [{"username":result.username, "subject":result.subject, "score_pct":result.score_percentage, "timestamp":result.posted_time, "difference":result.difference, "user_pic":result.profile_pic} for result in user]
         message = None
         print(result_list)
-        # Updated the latest_login column everytime quizfeed route load
+        # Updated the latest_login column everytime quizfeed route is refresh
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S') 
         for row in user:
+            print(row)
             row.latest_login = current_time
             db.session.commit()
+        
+        # Updated the current time login everytime quizfeed route is refresh
+        for row in user: 
+            delta = row.time_difference
+            if delta.total_seconds() > 60:
+                total_min = int(delta.total_seconds() // 60)
+                row.difference = f'{total_min} min ago'
+                db.session.commit()
+
+            elif delta.total_seconds() > 3600:
+                total_hours = delta.total_seconds() // 3600
+                row.difference = int(f'{total_hours} hr ago')
+                db.session.commit()
+
+            elif delta.total_seconds() > 86400:
+                total_days = delta.total_seconds() // 86400
+                row.difference = int(f'{total_days} d ago')
+                db.session.commit()
+            
+            else:
+                total_sec = delta.total_seconds()
+                row.difference = f'{total_sec}s ago'
+                db.session.commit()
+
+
+            
+
    
     return render_template('quizfeed.html', result_list=result_list, message=message)
 
