@@ -269,9 +269,9 @@
         <img src="{{url_for('static', filename='logo.png')}}" alt="Example Image">
         <div class="course-list">
             <span>
-                <a href="{{url_for('quizfeed')}}">Quizzers Feed</a>
-                <a href="{{url_for('electronics')}}">Electronics</a>
-                <a href="{{url_for('communications')}}">Communications</a>
+                <a href="{{url_for('quizfeed', username=current_user.username)}}">Quizzers Feed</a>
+                <a href="{{url_for('electronics', username=current_user.username)}}">Electronics</a>
+                <a href="{{url_for('communications', username=current_user.username)}}">Communications</a>
                 <a href="{{url_for('electronics')}}">GEAS</a>
                 <a href="{{url_for('electronics')}}">Math</a>
             </span>
@@ -359,7 +359,7 @@
             {% if user %}
               {%for page_num in user.iter_pages()%}
                  {%if page_num %}
-                 <a href="{{url_for('account', page=page_num)}}">{{page_num}}</a>
+                 <a href="{{url_for('account', page=page_num, username=current_user.username)}}">{{page_num}}</a>
                  {%endif%}
               {%endfor%}
               {%endif%}

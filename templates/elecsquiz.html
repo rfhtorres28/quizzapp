@@ -75,7 +75,7 @@
    <div class="nav-bar">
        <img src="../static/logo.png">
        <h1>Electronics</h1>
-       <a href="{{url_for('account')}}">Home</a>
+       <a href="{{url_for('account', username=current_user.username)}}">Home</a>
     </div>
     <div class="content-section">
       <h2>Choose the best answer among the choices</h2>
@@ -97,7 +97,7 @@
               <li>
       
                        <p>{{ field.label.text}}</p>
-               {% for option in field.choices %}
+                {% for option in field.choices %}
                    <label>
                            <input type="radio" name="{{field.id}}" value="{{ option[0]}}"> <!-- This is for user input letter choice, the field.id is automatically generated -->
                                  {{ option[1] }} <!-- This is to display the content of the choices (access the content of the tuple in the question forms)-->

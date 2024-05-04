@@ -14,7 +14,11 @@
 
 
 .fixed-element {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);  
+    border: 2px solid #069c17;
   position: fixed;
   top: 2%;
   left: 2%;
@@ -32,34 +36,38 @@
   flex-direction: column;
   align-items: center;
   position: absolute;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
   margin-top: 1%; /* Adjust this value to avoid content overlapping with the fixed element */
-  margin-left: -140px;
+  margin-left: -80px;
   padding: 20px;
-  overflow-y: auto; /* Enable vertical scrolling for the scrollable portion */
-  width: 700px;
-  height: 1050px;
+  /* overflow-y: auto; Enable vertical scrolling for the scrollable portion */
+  /* width: 700px;
+  height: 1050px; */
 }
 .quiz-post {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);  
+    border: 2px solid #069c17;
     margin-bottom: 1%;
-    width: 500px;
-    height: 300px;
+    width: 570px;
+    height: 100px;
     margin-top: 2%;
     padding: 4%;
+    border-radius: 30%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
 }
 .quiz-post img {
     position: absolute;
     border-radius: 50%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
-    margin-right: 7%;
-    margin-left: -55%;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.7); 
+    margin-right: 75%;
+    margin-top: 3%;
+    /* margin-left: -55%; */
 }
 .quiz-post span {
-    margin-left: 5%;
+    margin-left: 6%;
     font-size: 20px;
 }
 .post-header {
@@ -69,30 +77,91 @@
     align-items: center;
     width: 400px;
     height: 50px;
+    font-size: 13px;
 }
-.main-header {
-    width: 200px;
-    height: 200px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+
+.scrollable-header {
+   border: 2px solid #000;
+   border-radius: 5%;
+   width: 130px;
+   height: 30px;
+   text-align: center;
+   justify-content: center;
+   align-items: center;
+   text-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+   margin-bottom: 2%;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+   padding: 3px; 
+   font-size: 24px;
 }
+.fixed-header { 
+    font-size: 25px;
+    margin-bottom: 4%;
+}
+.subject-header {
+    font-size: 20px;
+}
+.scorer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.electronics-scorer, .communication-scorer {
+    width: 220px;
+    height: 90px;
+    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
+    text-align: center;
+}
+.home-link {
+    position: fixed;
+    margin-top: 38%;
+    font-size: 20px;
+}
+.home-link a{
+   
+    text-decoration: none;
+}
+.label {
+    margin-left: 3%;
+}
+
     </style>
 </head>
 <body>
 
     <div class="container">
         <div class="fixed-element">
-             <span>Top Scorers per category</span>
+             <span class="fixed-header">Top Scorers per category</span>
+             <div class="scorer"><br>
+                <span class="subject-header">Electronics</span>
+                <div class="electronics-scorer">
+                <ol type="1">
+                    {% for scorer in scorer_elecs %}
+                        <li>@{{scorer['user']}}-{{scorer['location']}} got {{scorer['score']}}% </li>
+                    {%endfor%}
+                </ol>
+              </div>
+                <span class="subject-header">Communication</span>
+                <div class="communication-scorer">
+                <ol type="1">
+                    {% for scorer in scorer_comms %}
+                        <li>@{{scorer['user']}}-{{scorer['location']}} got {{scorer['score']}}% </li>
+                    {%endfor%}
+                </ol>
+                </div>
+             </div>
+             <span class="home-link"><a href = "{{url_for('account', username=current_user.username)}}">Account</a></span>
         </div>
         <div class="scrollable-content">
-            <div class="main-header" style="text-align: center; font-size: 25px; position: fixed;">Quiz Feed Post</div>
+            <div class="scrollable-header">Quiz Feed</div>
                 {%if result_list%}
                  {%for result in result_list%}
                 <div class="quiz-post">
                     <div class = "post-header">
                         <img src="{{result['user_pic']}}" alt="Example Image" class="user_profile_image" width="70px" height="70px">
-                        <span>@{{result['username']}} got <span style="color: red; margin-left: 2px;">{{result['score_pct']}}%</span> in {{result['subject']}} Quiz</span> <br>
+                        <span style="margin-left: 5%;">@{{result['username']}} got <span style="color: red; margin-left: 2px;">{{result['score_pct']}}%</span> in {{result['subject']}} Quiz</span> <br>
                     </div>
-                   <span>Answered {{result['difference']}}</span>
+                   <span style="font-size: 15px; margin-top: 4%;">Answered {{result['difference']}}</span>
                 </div>
                 {%endfor%}
                 {%endif%}

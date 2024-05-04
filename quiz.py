@@ -136,6 +136,7 @@ class UserResult(db.Model):
     latest_login = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
     profile_pic = db.Column(db.String(255), nullable=True)
     difference = db.Column(db.String(255), nullable=True)
+    country = db.Column(db.String(255))
 
     @hybrid_property
     def time_difference(self):
@@ -383,7 +384,7 @@ def login():
         user = UserDetails.query.filter_by(email=form.email.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user) # Get the state of the user that is currently login, so it means that if a user logs in, it is stored in the login_user()
-            return redirect(url_for('account'))
+            return redirect(url_for('account', username=user.username))
         else:
             flash('User not found, Please try again')
             return redirect(url_for('login'))
@@ -393,10 +394,9 @@ def login():
 
 
 
-
-@app.route("/account", methods=['GET', 'POST'])
+@app.route("/account/<username>", methods=['GET', 'POST'])
 @login_required
-def account():
+def account(username):
     
     present_user = current_user.firstname + ' ' + current_user.lastname
     username = current_user.username
@@ -646,6 +646,7 @@ class Electronics(Resource):
 
             if current_user.is_authenticated:
                 username = current_user.username 
+                country = current_user.country
                 session["user_result"] = user_result # store the user_result to the session
                 session_user_result = session.get("user_result")
 
@@ -653,12 +654,12 @@ class Electronics(Resource):
             if session_user_result:
                      score_percentage = session_user_result["score_percentage"]
                      no_correct_answer = session_user_result["no_correct_answer"]
-                     timestamp = session_user_result["timestamp"]
+                     timestamp = session_user_result["timestamp"] 
                      subject = session_user_result["subject"]
                      
             
             if session_id:
-                     new_result = UserResult(user_id=current_user.id, username=username, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, posted_time=timestamp)
+                     new_result = UserResult(user_id=current_user.id, username=username, country=country, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, posted_time=timestamp)
                      db.session.add(new_result)
                      db.session.commit()
             
@@ -699,43 +700,39 @@ def quizfeed():
             row.latest_login = current_time
             db.session.commit()
         
-        # Updated the current time login everytime quizfeed route is refresh
+        # Give the length of time from it was posted until the current time
         for row in user: 
             delta = row.time_difference
-            if delta.total_seconds() > 60:
-                total_min = int(delta.total_seconds() // 60)
-                row.difference = f'{total_min} min ago'
+            if delta.total_seconds() > 86400:
+                total_days = delta.total_seconds() // 86400
+                row.difference = f'{int(total_days)}d ago'
                 db.session.commit()
 
             elif delta.total_seconds() > 3600:
                 total_hours = delta.total_seconds() // 3600
-                row.difference = int(f'{total_hours} hr ago')
+                row.difference = f'{int(total_hours)}h ago'
                 db.session.commit()
 
-            elif delta.total_seconds() > 86400:
-                total_days = delta.total_seconds() // 86400
-                row.difference = int(f'{total_days} d ago')
+            elif delta.total_seconds() > 60:
+                total_min = delta.total_seconds() // 60
+                row.difference = f'{int(total_min)} min ago'
                 db.session.commit()
             
             else:
                 total_sec = delta.total_seconds()
-                row.difference = f'{total_sec}s ago'
+                row.difference = f'{int(total_sec)}s ago'
                 db.session.commit()
+        
+        elecs_scorer = UserResult.query.filter_by(subject='Electronics').order_by(UserResult.score_percentage.desc()).limit(3).all()
+        scorer_elecs = [{"user":user.username, "score":user.score_percentage, "location":user.country} for user in elecs_scorer]
+
+        comms_scorer = UserResult.query.filter_by(subject='Communication').order_by(UserResult.score_percentage.desc()).limit(3).all()
+        scorer_comms = [{"user":user.username, "score":user.score_percentage, "location":user.country} for user in comms_scorer]
+
+       
+    return render_template('quizfeed.html', result_list=result_list, message=message, scorer_elecs=scorer_elecs, scorer_comms=scorer_comms)
 
 
-            
-
-   
-    return render_template('quizfeed.html', result_list=result_list, message=message)
-
-
-
-
-# @socketio.on("message")
-# def handle_message(message):
-#     if message == "Data received":
-#         print("Data Received")
-  
    
 # Creating API Resource for Communications Questions 
 class Communications(Resource):
@@ -842,6 +839,7 @@ class Communications(Resource):
 
             if current_user.is_authenticated:
                 username = current_user.username 
+                country = current_user.country
                 session["user_result"] = user_result # store the user_result to the session
                 session_user_result = session.get("user_result")
 
@@ -853,7 +851,7 @@ class Communications(Resource):
                      
             
             if session_id:
-                     new_result = UserResult(user_id=current_user.id, username=username, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, posted_time=timestamp)
+                     new_result = UserResult(user_id=current_user.id, username=username, country=country, session_id=session_id, subject=subject, score_percentage=score_percentage, no_correct_answer=no_correct_answer, posted_time=timestamp)
                      db.session.add(new_result)
                      db.session.commit()
             
