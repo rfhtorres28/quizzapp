@@ -59,7 +59,7 @@
         <img src="../static/logo.png">
         <h1>Delete Account</h1>
         <div class="header">
-             <p>Deleting your account will completely remove all of your informations and log results from quiz activities. Do you wish to continue?  If not, click this <a href="{{url_for('account')}}"> link</a> to go back to your account</p>
+             <p>Deleting your account will completely remove all of your informations and log results from your quiz activities. Do you wish to continue?  If not, click this <a href="{{url_for('account', username=current_user.username)}}"> link</a> to go back to your account.</p>
         </div>
         <form method="POST">
             <button type="submit" name="delete_account" value="delete">Delete Account</button>

@@ -128,7 +128,7 @@ class UserResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     subject = db.Column(db.String(20))
     user_id = db.Column(db.Integer, db.ForeignKey('userdetails.id'), nullable=False)
-    username = db.Column(db.String(255), db.ForeignKey('userdetails.username'), nullable=False)
+    username = db.Column(db.String(255), nullable=False)
     session_id = db.Column(db.String(50), nullable=False)
     score_percentage = db.Column(db.String(5))
     no_correct_answer = db.Column(db.String(5))
@@ -203,31 +203,32 @@ class RegistrationForm(FlaskForm):
 
 
 countries = [
-    ("AF", "Afghanistan"), ("AL", "Albania"), ("DZ", "Algeria"), ("AS", "American Samoa"), ("AD", "Andorra"), ("AO", "Angola"), ("AI", "Anguilla"), ("AQ", "Antarctica"), ("AG", "Antigua and Barbuda"), ("AR", "Argentina"),
-    ("AM", "Armenia"), ("AW", "Aruba"), ("AU", "Australia"), ("AT", "Austria"), ("AZ", "Azerbaijan"), ("BS", "Bahamas"), ("BH", "Bahrain"), ("BD", "Bangladesh"), ("BB", "Barbados"), ("BY", "Belarus"),
-    ("BE", "Belgium"), ("BZ", "Belize"), ("BJ", "Benin"), ("BM", "Bermuda"), ("BT", "Bhutan"), ("BO", "Bolivia"), ("BA", "Bosnia and Herzegovina"), ("BW", "Botswana"), ("BV", "Bouvet Island"), ("BR", "Brazil"),
-    ("IO", "British Indian Ocean Territory"), ("BN", "Brunei Darussalam"), ("BG", "Bulgaria"), ("BF", "Burkina Faso"), ("BI", "Burundi"), ("KH", "Cambodia"), ("CM", "Cameroon"), ("CA", "Canada"), ("CV", "Cape Verde"), ("KY", "Cayman Islands"),
-    ("CF", "Central African Republic"), ("TD", "Chad"), ("CL", "Chile"), ("CN", "China"), ("CX", "Christmas Island"), ("CC", "Cocos (Keeling) Islands"), ("CO", "Colombia"), ("KM", "Comoros"), ("CG", "Congo"), ("CD", "Congo, the Democratic Republic of the"),
-    ("CK", "Cook Islands"), ("CR", "Costa Rica"), ("CI", "Cote D'Ivoire"), ("HR", "Croatia"), ("CU", "Cuba"), ("CY", "Cyprus"), ("CZ", "Czech Republic"), ("DK", "Denmark"), ("DJ", "Djibouti"), ("DM", "Dominica"),
-    ("DO", "Dominican Republic"), ("EC", "Ecuador"), ("EG", "Egypt"), ("SV", "El Salvador"), ("GQ", "Equatorial Guinea"), ("ER", "Eritrea"), ("EE", "Estonia"), ("ET", "Ethiopia"), ("FK", "Falkland Islands (Malvinas)"), ("FO", "Faroe Islands"),
-    ("FJ", "Fiji"), ("FI", "Finland"), ("FR", "France"), ("GF", "French Guiana"), ("PF", "French Polynesia"), ("TF", "French Southern Territories"), ("GA", "Gabon"), ("GM", "Gambia"), ("GE", "Georgia"), ("DE", "Germany"),
-    ("GH", "Ghana"), ("GI", "Gibraltar"), ("GR", "Greece"), ("GL", "Greenland"), ("GD", "Grenada"), ("GP", "Guadeloupe"), ("GU", "Guam"), ("GT", "Guatemala"), ("GN", "Guinea"), ("GW", "Guinea-Bissau"),
-    ("GY", "Guyana"), ("HT", "Haiti"), ("HM", "Heard Island and Mcdonald Islands"), ("VA", "Holy See (Vatican City State)"), ("HN", "Honduras"), ("HK", "Hong Kong"), ("HU", "Hungary"), ("IS", "Iceland"), ("IN", "India"),
-    ("ID", "Indonesia"), ("IR", "Iran, Islamic Republic of"), ("IQ", "Iraq"), ("IE", "Ireland"), ("IL", "Israel"), ("IT", "Italy"), ("JM", "Jamaica"), ("JP", "Japan"), ("JO", "Jordan"), ("KZ", "Kazakhstan"),
-    ("KE", "Kenya"), ("KI", "Kiribati"), ("KP", "Korea, Democratic People's Republic of"), ("KR", "Korea, Republic of"), ("KW", "Kuwait"), ("KG", "Kyrgyzstan"), ("LA", "Lao People's Democratic Republic"), ("LV", "Latvia"), ("LB", "Lebanon"),
-    ("LS", "Lesotho"), ("LR", "Liberia"), ("LY", "Libyan Arab Jamahiriya"), ("LI", "Liechtenstein"), ("LT", "Lithuania"), ("LU", "Luxembourg"), ("MO", "Macao"), ("MK", "Macedonia, the Former Yugoslav Republic of"), ("MG", "Madagascar"),
-    ("MW", "Malawi"), ("MY", "Malaysia"), ("MV", "Maldives"), ("ML", "Mali"), ("MT", "Malta"), ("MH", "Marshall Islands"), ("MQ", "Martinique"), ("MR", "Mauritania"), ("MU", "Mauritius"), ("YT", "Mayotte"),
-    ("MX", "Mexico"), ("FM", "Micronesia, Federated States of"), ("MD", "Moldova, Republic of"), ("MC", "Monaco"), ("MN", "Mongolia"), ("MS", "Montserrat"), ("MA", "Morocco"), ("MZ", "Mozambique"), ("MM", "Myanmar"),
-    ("NA", "Namibia"), ("NR", "Nauru"), ("NP", "Nepal"), ("NL", "Netherlands"), ("AN", "Netherlands Antilles"), ("NC", "New Caledonia"), ("NZ", "New Zealand"), ("NI", "Nicaragua"), ("NE", "Niger"), ("NG", "Nigeria"),
-    ("NU", "Niue"), ("NF", "Norfolk Island"), ("MP", "Northern Mariana Islands"), ("NO", "Norway"), ("OM", "Oman"), ("PK", "Pakistan"), ("PW", "Palau"), ("PS", "Palestinian Territory, Occupied"), ("PA", "Panama"), ("PG", "Papua New Guinea"),
-    ("PY", "Paraguay"), ("PE", "Peru"), ("PH", "Philippines"), ("PN", "Pitcairn"), ("PL", "Poland"), ("PT", "Portugal"), ("PR", "Puerto Rico"), ("QA", "Qatar"), ("RE", "Reunion"), ("RO", "Romania"), ("RU", "Russian Federation"),
-    ("RW", "Rwanda"), ("SH", "Saint Helena"), ("KN", "Saint Kitts and Nevis"), ("LC", "Saint Lucia"), ("PM", "Saint Pierre and Miquelon"), ("VC", "Saint Vincent and the Grenadines"), ("WS", "Samoa"), ("SM", "San Marino"), ("ST", "Sao Tome and Principe"),
-    ("SA", "Saudi Arabia"), ("SN", "Senegal"), ("CS", "Serbia and Montenegro"), ("SC", "Seychelles"), ("SL", "Sierra Leone"), ("SG", "Singapore"), ("SK", "Slovakia"), ("SI", "Slovenia"), ("SB", "Solomon Islands"), ("SO", "Somalia"),
-    ("ZA", "South Africa"), ("GS", "South Georgia and the South Sandwich Islands"), ("ES", "Spain"), ("LK", "Sri Lanka"), ("SD", "Sudan"), ("SR", "Suriname"), ("SJ", "Svalbard and Jan Mayen"), ("SZ", "Swaziland"), ("SE", "Sweden"),
-    ("CH", "Switzerland"), ("SY", "Syrian Arab Republic"), ("TW", "Taiwan, Province of China"), ("TJ", "Tajikistan"), ("TZ", "Tanzania, United Republic of"), ("TH", "Thailand"), ("TL", "Timor-Leste"), ("TG", "Togo"), ("TK", "Tokelau"),
-    ("TO", "Tonga"), ("TT", "Trinidad and Tobago"), ("TN", "Tunisia"), ("TR", "Turkey"), ("TM", "Turkmenistan"), ("TC", "Turks and Caicos Islands"), ("TV", "Tuvalu"), ("UG", "Uganda"), ("UA", "Ukraine"), ("AE", "United Arab Emirates"),
-    ("GB", "United Kingdom"), ("US", "United States"), ("UM", "United States Minor Outlying Islands"), ("UY", "Uruguay"), ("UZ", "Uzbekistan"), ("VU", "Vanuatu"), ("VE", "Venezuela"), ("VN", "Viet Nam"), ("VG", "Virgin Islands, British"),
-    ("VI", "Virgin Islands, U.s."), ("WF", "Wallis and Futuna"), ("EH", "Western Sahara"), ("YE", "Yemen"), ("ZM", "Zambia"), ("ZW", "Zimbabwe")]
+    ("Afghanistan", "Afghanistan"), ("Albania", "Albania"), ("Algeria", "Algeria"), ("American Samoa", "American Samoa"), ("Andorra", "Andorra"), ("Angola", "Angola"), ("Anguilla", "Anguilla"), ("Antarctica", "Antarctica"), ("Antigua and Barbuda", "Antigua and Barbuda"), ("Argentina", "Argentina"),
+    ("Armenia", "Armenia"), ("Aruba", "Aruba"), ("Australia", "Australia"), ("Austria", "Austria"), ("Azerbaijan", "Azerbaijan"), ("Bahamas", "Bahamas"), ("Bahrain", "Bahrain"), ("Bangladesh", "Bangladesh"), ("Barbados", "Barbados"), ("Belarus", "Belarus"),
+    ("Belgium", "Belgium"), ("Belize", "Belize"), ("Benin", "Benin"), ("Bermuda", "Bermuda"), ("Bhutan", "Bhutan"), ("Bolivia", "Bolivia"), ("Bosnia and Herzegovina", "Bosnia and Herzegovina"), ("Botswana", "Botswana"), ("Bouvet Island", "Bouvet Island"), ("Brazil", "Brazil"),
+    ("British Indian Ocean Territory", "British Indian Ocean Territory"), ("Brunei Darussalam", "Brunei Darussalam"), ("Bulgaria", "Bulgaria"), ("Burkina Faso", "Burkina Faso"), ("Burundi", "Burundi"), ("Cambodia", "Cambodia"), ("Cameroon", "Cameroon"), ("Canada", "Canada"), ("Cape Verde", "Cape Verde"), ("Cayman Islands", "Cayman Islands"),
+    ("Central African Republic", "Central African Republic"), ("Chad", "Chad"), ("Chile", "Chile"), ("China", "China"), ("Christmas Island", "Christmas Island"), ("Cocos (Keeling) Islands", "Cocos (Keeling) Islands"), ("Colombia", "Colombia"), ("Comoros", "Comoros"), ("Congo", "Congo"), ("Congo, the Democratic Republic of the", "Congo, the Democratic Republic of the"),
+    ("Cook Islands", "Cook Islands"), ("Costa Rica", "Costa Rica"), ("Cote D'Ivoire", "Cote D'Ivoire"), ("Croatia", "Croatia"), ("Cuba", "Cuba"), ("Cyprus", "Cyprus"), ("Czech Republic", "Czech Republic"), ("Denmark", "Denmark"), ("Djibouti", "Djibouti"), ("Dominica", "Dominica"),
+    ("Dominican Republic", "Dominican Republic"), ("Ecuador", "Ecuador"), ("Egypt", "Egypt"), ("El Salvador", "El Salvador"), ("Equatorial Guinea", "Equatorial Guinea"), ("Eritrea", "Eritrea"), ("Estonia", "Estonia"), ("Ethiopia", "Ethiopia"), ("Falkland Islands (Malvinas)", "Falkland Islands (Malvinas)"), ("Faroe Islands", "Faroe Islands"),
+    ("Fiji", "Fiji"), ("Finland", "Finland"), ("France", "France"), ("French Guiana", "French Guiana"), ("French Polynesia", "French Polynesia"), ("French Southern Territories", "French Southern Territories"), ("Gabon", "Gabon"), ("Gambia", "Gambia"), ("Georgia", "Georgia"), ("Germany", "Germany"),
+    ("Ghana", "Ghana"), ("Gibraltar", "Gibraltar"), ("Greece", "Greece"), ("Greenland", "Greenland"), ("Grenada", "Grenada"), ("Guadeloupe", "Guadeloupe"), ("Guam", "Guam"), ("Guatemala", "Guatemala"), ("Guinea", "Guinea"), ("Guinea-Bissau", "Guinea-Bissau"),
+    ("Guyana", "Guyana"), ("Haiti", "Haiti"), ("Heard Island and Mcdonald Islands", "Heard Island and Mcdonald Islands"), ("Holy See (Vatican City State)", "Holy See (Vatican City State)"), ("Honduras", "Honduras"), ("Hong Kong", "Hong Kong"), ("Hungary", "Hungary"), ("Iceland", "Iceland"), ("India", "India"),
+    ("Indonesia", "Indonesia"), ("Iran, Islamic Republic of", "Iran, Islamic Republic of"), ("Iraq", "Iraq"), ("Ireland", "Ireland"), ("Israel", "Israel"), ("Italy", "Italy"), ("Jamaica", "Jamaica"), ("Japan", "Japan"), ("Jordan", "Jordan"), ("Kazakhstan", "Kazakhstan"),
+    ("Kenya", "Kenya"), ("Kiribati", "Kiribati"), ("Korea, Democratic People's Republic of", "Korea, Democratic People's Republic of"), ("Korea, Republic of", "Korea, Republic of"), ("Kuwait", "Kuwait"), ("Kyrgyzstan", "Kyrgyzstan"), ("Lao People's Democratic Republic", "Lao People's Democratic Republic"), ("Latvia", "Latvia"), ("Lebanon", "Lebanon"),
+    ("Lesotho", "Lesotho"), ("Liberia", "Liberia"), ("Libyan Arab Jamahiriya", "Libyan Arab Jamahiriya"), ("Liechtenstein", "Liechtenstein"), ("Lithuania", "Lithuania"), ("Luxembourg", "Luxembourg"), ("Macao", "Macao"), ("Macedonia, the Former Yugoslav Republic of", "Macedonia, the Former Yugoslav Republic of"), ("Madagascar", "Madagascar"),
+    ("Malawi", "Malawi"), ("Malaysia", "Malaysia"), ("Maldives", "Maldives"), ("Mali", "Mali"), ("Malta", "Malta"), ("Marshall Islands", "Marshall Islands"), ("Martinique", "Martinique"), ("Mauritania", "Mauritania"), ("Mauritius", "Mauritius"), ("Mayotte", "Mayotte"),
+    ("Mexico", "Mexico"), ("Micronesia, Federated States of", "Micronesia, Federated States of"), ("Moldova, Republic of", "Moldova, Republic of"), ("Monaco", "Monaco"), ("Mongolia", "Mongolia"), ("Montserrat", "Montserrat"), ("Morocco", "Morocco"), ("Mozambique", "Mozambique"), ("Myanmar", "Myanmar"),
+    ("Namibia", "Namibia"), ("Nauru", "Nauru"), ("Nepal", "Nepal"), ("Netherlands", "Netherlands"), ("Netherlands Antilles", "Netherlands Antilles"), ("New Caledonia", "New Caledonia"), ("New Zealand", "New Zealand"), ("Nicaragua", "Nicaragua"), ("Niger", "Niger"), ("Nigeria", "Nigeria"),
+    ("Niue", "Niue"), ("Norfolk Island", "Norfolk Island"), ("Northern Mariana Islands", "Northern Mariana Islands"), ("Norway", "Norway"), ("Oman", "Oman"), ("Pakistan", "Pakistan"), ("Palau", "Palau"), ("Palestinian Territory, Occupied", "Palestinian Territory, Occupied"), ("Panama", "Panama"), ("Papua New Guinea", "Papua New Guinea"),
+    ("Paraguay", "Paraguay"), ("Peru", "Peru"), ("Philippines", "Philippines"), ("Pitcairn", "Pitcairn"), ("Poland", "Poland"), ("Portugal", "Portugal"), ("Puerto Rico", "Puerto Rico"), ("Qatar", "Qatar"), ("Reunion", "Reunion"), ("Romania", "Romania"), ("Russian Federation", "Russian Federation"),
+    ("Rwanda", "Rwanda"), ("Saint Helena", "Saint Helena"), ("Saint Kitts and Nevis", "Saint Kitts and Nevis"), ("Saint Lucia", "Saint Lucia"), ("Saint Pierre and Miquelon", "Saint Pierre and Miquelon"), ("Saint Vincent and the Grenadines", "Saint Vincent and the Grenadines"), ("Samoa", "Samoa"), ("San Marino", "San Marino"), ("Sao Tome and Principe", "Sao Tome and Principe"),
+    ("Saudi Arabia", "Saudi Arabia"), ("Senegal", "Senegal"), ("Serbia and Montenegro", "Serbia and Montenegro"), ("Seychelles", "Seychelles"), ("Sierra Leone", "Sierra Leone"), ("Singapore", "Singapore"), ("Slovakia", "Slovakia"), ("Slovenia", "Slovenia"), ("Solomon Islands", "Solomon Islands"), ("Somalia", "Somalia"),
+    ("South Africa", "South Africa"), ("South Georgia and the South Sandwich Islands", "South Georgia and the South Sandwich Islands"), ("Spain", "Spain"), ("Sri Lanka", "Sri Lanka"), ("Sudan", "Sudan"), ("Suriname", "Suriname"), ("Svalbard and Jan Mayen", "Svalbard and Jan Mayen"), ("Swaziland", "Swaziland"), ("Sweden", "Sweden"),
+    ("Switzerland", "Switzerland"), ("Syrian Arab Republic", "Syrian Arab Republic"), ("Taiwan, Province of China", "Taiwan, Province of China"), ("Tajikistan", "Tajikistan"), ("Tanzania, United Republic of", "Tanzania, United Republic of"), ("Thailand", "Thailand"), ("Timor-Leste", "Timor-Leste"), ("Togo", "Togo"), ("Tokelau", "Tokelau"),
+    ("Tonga", "Tonga"), ("Trinidad and Tobago", "Trinidad and Tobago"), ("Tunisia", "Tunisia"), ("Turkey", "Turkey"), ("Turkmenistan", "Turkmenistan"), ("Turks and Caicos Islands", "Turks and Caicos Islands"), ("Tuvalu", "Tuvalu"), ("Uganda", "Uganda"), ("Ukraine", "Ukraine"), ("United Arab Emirates", "United Arab Emirates"),
+    ("United Kingdom", "United Kingdom"), ("United States", "United States"), ("United States Minor Outlying Islands", "United States Minor Outlying Islands"), ("Uruguay", "Uruguay"), ("Uzbekistan", "Uzbekistan"), ("Vanuatu", "Vanuatu"), ("Venezuela", "Venezuela"), ("Viet Nam", "Viet Nam"), ("Virgin Islands, British", "Virgin Islands, British"),
+    ("Virgin Islands, U.s.", "Virgin Islands, U.s."), ("Wallis and Futuna", "Wallis and Futuna"), ("Western Sahara", "Western Sahara"), ("Yemen", "Yemen"), ("Zambia", "Zambia"), ("Zimbabwe", "Zimbabwe")]
+
 
 
 
@@ -243,14 +244,12 @@ class ProfileForm(FlaskForm):
     submit = SubmitField('Finish')
 
 
- 
    
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
-
 
 
 class UpdateInformation(FlaskForm):
@@ -397,33 +396,36 @@ def login():
 @app.route("/account/<username>", methods=['GET', 'POST'])
 @login_required
 def account(username):
-    
-    present_user = current_user.firstname + ' ' + current_user.lastname
-    username = current_user.username
-    bio = current_user.bio
-    email = current_user.email
-    instagram = f'https://www.instagram.com/{current_user.instagram_link}'
-    facebook = f'https://www.facebook.com/{current_user.facebook_link}'
-    image_file = url_for('static', filename='../static/profile_pics/' + current_user.image_file)
-    record = [] 
-    user = None
-    selected_course = ''
- 
-    
-    if request.method == 'POST':
-      selected_course = request.form.get('course', '')
-      session['selected_course'] = selected_course  # Store selected course in session
-    else:
-         selected_course = session.get('selected_course', '')  # Retrieve selected course from session
 
-    page = request.args.get('page', 1, type=int)
-    user = UserResult.query.filter_by(user_id=current_user.id, subject=selected_course).paginate(page=page, per_page=10)
-    record = [{"subject": result.subject, "score_percentage": result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp": result.posted_time} for result in user.items]
+    user = UserDetails.query.filter_by(username=username).first()
+    if user:
+      present_user = user.firstname + ' ' + user.lastname
+      username = user.username
+      bio = user.bio
+      email = user.email
+      instagram = f'https://www.instagram.com/{user.instagram_link}'
+      facebook = f'https://www.facebook.com/{user.facebook_link}'
+      image_file = url_for('static', filename='../static/profile_pics/' + current_user.image_file)   
+      profile_pic = url_for('static', filename='../static/profile_pics/' + user.image_file)
+      record = []    
+      selected_course = ''
+      
 
+      if request.method == 'POST':
+        selected_course = request.form.get('course', '')
+        session['selected_course'] = selected_course  # Store selected course in session
+      else:
+           selected_course = session.get('selected_course', '')  # Retrieve selected course from session
+
+      page = request.args.get('page', 1, type=int)
+      user_course = UserResult.query.filter_by(user_id=user.id, subject=selected_course).paginate(page=page, per_page=10)
+      record = [{"subject": result.subject, "score_percentage": result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp": result.posted_time} for result in user_course.items]
 
          
-    return render_template('account.html', image_file=image_file, present_user=present_user, username=username, bio=bio, record=record, instagram=instagram, facebook=facebook, email=email, user=user, selected_course=selected_course)
-
+      return render_template('account.html', profile_pic=profile_pic, image_file=image_file, present_user=present_user, username=username, bio=bio, record=record, instagram=instagram, facebook=facebook, email=email, user_course=user_course, selected_course=selected_course, user=user)
+    
+    else:
+        return 'User not found', 404
 
 
 @app.route("/logout")
@@ -461,7 +463,23 @@ def edit_information():
                         picture_file = save_picture(form.picture.data)
                         current_user.image_file = picture_file
              db.session.commit()
-             return redirect(url_for('account'))
+
+             #Update username on UserDetails table
+             user = UserResult.query.filter_by(user_id=current_user.id).all()
+             for user in user:
+                 user.username = current_user.username
+                 db.session.commit()
+             
+             # Update profile picture on UserResult table
+             image_file = url_for('static', filename='../static/profile_pics/' + current_user.image_file)
+             user = UserResult.query.filter_by(username=current_user.username).all()
+             for user in user:
+                 user.profile_pic = image_file
+                 db.session.commit()
+             
+
+
+             return redirect(url_for('account', username=current_user.username))
         
 
     elif request.method == 'GET':
@@ -484,7 +502,6 @@ def edit_information():
 
 
 
-
 @app.route('/edit_password', methods=['GET', 'POST'])
 def edit_password():
 
@@ -495,7 +512,7 @@ def edit_password():
             hashed_new_password = bcrypt.generate_password_hash(request.form['new_password']).decode('utf-8')
             user.password = hashed_new_password
             db.session.commit()
-            return redirect(url_for('account'))
+            return redirect(url_for('account', username=current_user.username))
         
 
         else:
@@ -679,9 +696,9 @@ class Electronics(Resource):
             
 
 
-@app.route("/quizfeed", methods=["GET"])
+@app.route("/quizfeed/<username>", methods=["GET"])
 @login_required
-def quizfeed():
+def quizfeed(username):
     
     
     result_list = []
@@ -715,7 +732,7 @@ def quizfeed():
 
             elif delta.total_seconds() > 60:
                 total_min = delta.total_seconds() // 60
-                row.difference = f'{int(total_min)} min ago'
+                row.difference = f'{int(total_min)}min ago'
                 db.session.commit()
             
             else:
@@ -723,12 +740,32 @@ def quizfeed():
                 row.difference = f'{int(total_sec)}s ago'
                 db.session.commit()
         
-        elecs_scorer = UserResult.query.filter_by(subject='Electronics').order_by(UserResult.score_percentage.desc()).limit(3).all()
-        scorer_elecs = [{"user":user.username, "score":user.score_percentage, "location":user.country} for user in elecs_scorer]
+        elecs_user = UserResult.query.filter_by(subject='Electronics').order_by(UserResult.no_correct_answer.desc()).all()
+        elecs_scorer = [{"user":user.username, "score":user.score_percentage, "location":user.country} for user in elecs_user]
+        scorer_elecs = []
 
-        comms_scorer = UserResult.query.filter_by(subject='Communication').order_by(UserResult.score_percentage.desc()).limit(3).all()
-        scorer_comms = [{"user":user.username, "score":user.score_percentage, "location":user.country} for user in comms_scorer]
 
+        for item in elecs_scorer:
+            if item["user"] not in [x["user"] for x in scorer_elecs]:
+                scorer_elecs.append(item)
+            else:
+                continue
+
+        scorer_elecs = scorer_elecs[:3]    
+        
+
+        comms_user = UserResult.query.filter_by(subject='Communication').order_by(UserResult.no_correct_answer.desc()).all()
+        comms_scorer = [{"user":user.username, "score":user.score_percentage, "location":user.country} for user in comms_user]
+        scorer_comms = []
+
+
+        for item in comms_scorer:
+            if item["user"] not in [x["user"] for x in scorer_comms]:
+                scorer_comms.append(item)
+            else:
+                continue
+
+        scorer_comms = scorer_comms[:3]    
        
     return render_template('quizfeed.html', result_list=result_list, message=message, scorer_elecs=scorer_elecs, scorer_comms=scorer_comms)
 
@@ -856,12 +893,18 @@ class Communications(Resource):
                      db.session.commit()
             
            
-            if form.validate():
+            if form.validate_on_submit(): # this also returns a POST request 
+                 image_file = url_for('static', filename='../static/profile_pics/' + current_user.image_file)
+                 user = UserResult.query.filter_by(session_id=session_user_result["session_id"]).first()
+                 if user:
+                     user.profile_pic = image_file
+                     db.session.commit()
                  return make_response(render_template('comms_result.html', form=form, score_percentage=score_percentage,
-                        no_correct_answer=no_correct_answer, total_questions=total_questions, messages=messages))   
+                        no_correct_answer=no_correct_answer, total_questions=total_questions, messages=messages))
+            
             else:
                flash('Complete answering the questions')
-               return redirect(url_for('communications')) 
+               return redirect(url_for('communication')) 
        
 
 
@@ -902,7 +945,7 @@ def commsanswers():
 
 
 if __name__ == "__main__": 
-    socketio.run(app, debug=True, host="localhost")
+    app.run(debug=True)
 
 
 # render_template typically returns an html string so use make_response() to ensure 

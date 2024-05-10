@@ -33,12 +33,13 @@
 
 .scrollable-content {
   display: flex;
+  justify-content: center;
   flex-direction: column;
   align-items: center;
   position: absolute;
-  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   margin-top: 1%; /* Adjust this value to avoid content overlapping with the fixed element */
-  margin-left: -80px;
+  margin-left: -6%;
   padding: 20px;
   /* overflow-y: auto; Enable vertical scrolling for the scrollable portion */
   /* width: 700px;
@@ -107,9 +108,9 @@
     align-items: center;
 }
 .electronics-scorer, .communication-scorer {
-    width: 220px;
+    width: 270px;
     height: 90px;
-    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
+    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  */
     text-align: center;
 }
 .home-link {
@@ -137,7 +138,7 @@
                 <div class="electronics-scorer">
                 <ol type="1">
                     {% for scorer in scorer_elecs %}
-                        <li>@{{scorer['user']}}-{{scorer['location']}} got {{scorer['score']}}% </li>
+                        <li>@{{scorer['user']}} got {{scorer['score']}}% ({{scorer['location']}})</li>
                     {%endfor%}
                 </ol>
               </div>
@@ -145,7 +146,7 @@
                 <div class="communication-scorer">
                 <ol type="1">
                     {% for scorer in scorer_comms %}
-                        <li>@{{scorer['user']}}-{{scorer['location']}} got {{scorer['score']}}% </li>
+                        <li>@{{scorer['user']}} got {{scorer['score']}}% ({{scorer['location']}})</li>
                     {%endfor%}
                 </ol>
                 </div>
@@ -159,7 +160,7 @@
                 <div class="quiz-post">
                     <div class = "post-header">
                         <img src="{{result['user_pic']}}" alt="Example Image" class="user_profile_image" width="70px" height="70px">
-                        <span style="margin-left: 5%;">@{{result['username']}} got <span style="color: red; margin-left: 2px;">{{result['score_pct']}}%</span> in {{result['subject']}} Quiz</span> <br>
+                        <span style="margin-left: 5%;"><a href="{{url_for('account', username=result['username'])}}" style="text-decoration: none;">@{{result['username']}}</a> got <span style="color: red; margin-left: 2px;">{{result['score_pct']}}%</span> in {{result['subject']}} Quiz</span> <br>
                     </div>
                    <span style="font-size: 15px; margin-top: 4%;">Answered {{result['difference']}}</span>
                 </div>
