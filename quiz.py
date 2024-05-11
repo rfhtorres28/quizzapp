@@ -407,6 +407,7 @@ def account(username):
       facebook = f'https://www.facebook.com/{user.facebook_link}'
       image_file = url_for('static', filename='../static/profile_pics/' + current_user.image_file)   
       profile_pic = url_for('static', filename='../static/profile_pics/' + user.image_file)
+      location = user.country
       record = []    
       selected_course = ''
       
@@ -422,7 +423,7 @@ def account(username):
       record = [{"subject": result.subject, "score_percentage": result.score_percentage, "correct_answer": result.no_correct_answer, "timestamp": result.posted_time} for result in user_course.items]
 
          
-      return render_template('account.html', profile_pic=profile_pic, image_file=image_file, present_user=present_user, username=username, bio=bio, record=record, instagram=instagram, facebook=facebook, email=email, user_course=user_course, selected_course=selected_course, user=user)
+      return render_template('account.html', location=location, profile_pic=profile_pic, image_file=image_file, present_user=present_user, username=username, bio=bio, record=record, instagram=instagram, facebook=facebook, email=email, user_course=user_course, selected_course=selected_course, user=user)
     
     else:
         return 'User not found', 404
