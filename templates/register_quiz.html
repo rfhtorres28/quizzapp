@@ -7,16 +7,22 @@
     <link rel="stylesheet" href="static/main.css">
 
     <style>
-        body, h1, h2, ol, form, p, label {
-            margin: 5px;
-            padding-left: 6px;
+        body {
+            margin-bottom: 3%;
+        }
+         h1, h2, ol, form, p, label {
+            margin: 7px;
+            padding-left: 2px;
+
         }
         .form-control {
-            width: 200px; /* Adjust this value to change the length of the input fields */
+            margin-left: 3.5%;
+            width: 350px; /* Adjust this value to change the length of the input fields */
+            height: 30px;
         }
         .content-section {
-    max-width: 430px; /* Adjust this value to change the maximum width of the form */
-    margin: 1 auto; /* This will center the form horizontally */
+       padding-bottom: 20px;
+       margin-top: 2%;
         }
 
         a.ml-2 {
@@ -25,6 +31,7 @@
    font-size: 15px; /* Set the font size */
    color: #124ad7; /* Set the text color */
        }
+
     div.invalid-feedback{
 
         color: #eb0134;
@@ -37,6 +44,7 @@
             padding: 20px; /* Add padding for spacing inside the container */
             box-sizing: border-box; /* Include padding and border in the width */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+
         }
     h1.register-header{
         color: #124a83;
@@ -44,7 +52,6 @@
         margin-bottom: 10px;
         font-weight: normal;
         font-size: 27px;
-
     }
     div.image-heading-container{
        
@@ -58,6 +65,7 @@
     display: flex;
     flex-direction: row; /* Make the content stack vertically */
     align-items: center; /* Center align items horizontally */
+    margin-left: 2%;
     }
     .signup-btn,
     a.ml-2 {
@@ -80,7 +88,9 @@
     .border-bottom-mb-3{
         font-size: 20px;
         margin-bottom: 10px;
+        text-align: center;
     }
+
     </style>
     
 </head>
@@ -101,8 +111,6 @@
             <fieldset class="form-group">
                 <legend class="border-bottom-mb-3">Personal Details</legend>
                 <div class="form-group">
-                    {{ form.firstname.label(class="form-control-label") }}
-
                     {% if form.firstname.errors %}
                     {{ form.firstname(class="form-control form-control-lg is-invalid") }}
                     <div class = "invalid-feedback">
@@ -111,14 +119,11 @@
                         {%endfor%}
                     </div>
                     {%else%}
-                        {{ form.firstname(class="form-control form-control-lg") }} 
+                        {{ form.firstname(class="form-control") }} 
                     {%endif %}
-        
                 </div>
                 <br>
                 <div class="form-group">
-                    {{ form.lastname.label(class="form-control-label") }}
-
                     {% if form.lastname.errors %}
                     {{ form.lastname(class="form-control form-control-lg is-invalid") }}
                     <div class = "invalid-feedback">
@@ -127,46 +132,39 @@
                         {%endfor%}
                     </div>
                     {%else%}
-                        {{ form.lastname(class="form-control form-control-lg") }} 
+                        {{ form.lastname(class="form-control") }} 
                     {%endif %}
         
                 </div>
                 <br>
                 <div class="form-group">
-                    {{ form.username.label(class="form-control-label") }}
-
                     {% if form.username.errors %}
                     {{ form.username(class="form-control form-control-lg is-invalid") }}
-                    <div class = "invalid-feedback">
+                    <div class = "invalid-feedback" style="margin-top: 2%; margin-left: 5%; margin-bottom: -2%;">
                         {%for error in form.username.errors %}
                          <span> {{error}}</span>       
                         {%endfor%}
                     </div>
                     {%else%}
-                        {{ form.username(class="form-control form-control-lg") }} 
+                        {{ form.username(class="form-control") }} 
                     {%endif %}
-        
                 </div>
                 <br>
                 <div class="form-group">
-                    {{ form.email.label(class="form-control-label") }}
-
                     {% if form.email.errors %}
                     {{ form.email(class="form-control form-control-lg is-invalid") }}
-                    <div class = "invalid-feedback">
+                    <div class = "invalid-feedback" style="margin-top: 2%; margin-left: 5%; margin-bottom: -2%;">
                         {%for error in form.email.errors %}
                          <span> {{error}}</span>       
                         {%endfor%}
                     </div>
                     {%else%}
-                        {{ form.email(class="form-control form-control-lg") }} 
+                        {{ form.email(class="form-control") }} 
                     {%endif %}
         
                 </div>
                 <br>
                 <div class="form-group">
-                    {{ form.password.label(class="form-control-label") }}
-
                     {% if form.password.errors %}
                     {{ form.password(class="form-control form-control-lg is-invalid") }}
                     <div class = "invalid-feedback">
@@ -175,14 +173,12 @@
                         {%endfor%}
                     </div>
                     {%else%}
-                        {{ form.password(class="form-control form-control-lg") }} 
+                        {{ form.password(class="form-control") }} 
                     {%endif %}
         
                 </div>
                 <br>
                 <div class="form-group">
-                    {{ form.confirm_password.label(class="form-control-label") }}
-
                     {% if form.confirm_password.errors %}
                     {{ form.password(class="form-control form-control-lg is-invalid") }}
                     <div class = "invalid-feedback">
@@ -191,7 +187,7 @@
                         {%endfor%}
                     </div>
                     {%else%}
-                        {{ form.confirm_password(class="form-control form-control-lg") }} 
+                        {{ form.confirm_password(class="form-control") }} 
                     {%endif %}
         
                 </div>

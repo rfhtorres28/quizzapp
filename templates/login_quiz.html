@@ -24,16 +24,16 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);   
         }
      img {
-            width: 200px;
-            height: 150px;
+            width: 220px;
+            height: 130px;
         }
     .form-section {
-        margin-top: -30px;
+        margin-top: -22px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         width: 400px; /* Adjust the width as needed */
-        height: 300px;
+        height: 250px;
         }
     .submit-section {
         display: flex;
@@ -43,6 +43,7 @@
         width: 300px;
         height: 50px;
         margin-right: 100px;
+        margin-top: 3%;
     }
     form {
         display: flex;
@@ -54,7 +55,7 @@
         width: 300px;
     }
     .form-section .submit-section{
-        margin-top: -10px;
+        margin-top: -2px;
         margin-left: 25%;
         }
      .submit-btn {
@@ -112,7 +113,7 @@
 
     
     <div class="main-section">
-            <img src="static\logo.png" alt="Example Image" width="100" height="100" class="logo">
+         <a href="{{url_for('home')}}"><img src="static\logo.png" alt="Example Image" width="100" height="100" class="logo"></a>   
     <div class="form-section">
         <form method="POST" action="">
             {{ form.hidden_tag() }}

@@ -12,9 +12,8 @@ from sqlalchemy import UnicodeText
 from email_validator import validate_email, EmailNotValidError
 import secrets
 import os 
-from datetime import datetime, timedelta
+from datetime import datetime
 import random
-from flask_socketio import SocketIO, send, emit
 from sqlalchemy.ext.hybrid import hybrid_property
 
 
@@ -24,7 +23,6 @@ app = Flask(__name__)
 api = Api(app)
 app.secret_key = 'Tootsie@2714'
 bcrypt = Bcrypt(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 
@@ -142,6 +140,26 @@ class UserResult(db.Model):
     def time_difference(self):
         return self.latest_login - self.posted_time
 
+class UserPost(db.Model):
+
+    __tablename__ = 'userpost'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('userdetails.id'), nullable=False)
+    post = db.Column(db.Text, nullable=False)
+    username = db.Column(db.String(255), nullable=False)
+    session_id = db.Column(db.String(50), nullable=False)
+    posted_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    latest_login = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
+    profile_pic = db.Column(db.String(255), nullable=True)
+    difference = db.Column(db.String(255), nullable=True)
+    country = db.Column(db.String(255))
+
+    @hybrid_property
+    def time_difference(self):
+        return self.latest_login - self.posted_time
+
+
+
 
 # Creating Electronics Quiz Form
 
@@ -173,12 +191,12 @@ comms_questions = [{"id":question.id, "content":question.content,
 
 class RegistrationForm(FlaskForm):
     
-    firstname = StringField('Firstname', validators=[DataRequired(), Length(min=2, max=20)])
-    lastname = StringField('Lastname', validators=[DataRequired(), Length(min=2, max=20)])
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match')])
+    firstname = StringField('Firstname', validators=[DataRequired(), Length(min=2, max=20)], render_kw={"placeholder": "Enter your Firsname"})
+    lastname = StringField('Lastname', validators=[DataRequired(), Length(min=2, max=20)], render_kw={"placeholder": "Enter your Lastname"})
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)], render_kw={"placeholder": "Enter your Username"})
+    email = StringField('Email', validators=[DataRequired(), Email()], render_kw={"placeholder": "Enter your Email"})
+    password = PasswordField('Password', validators=[DataRequired()], render_kw={"placeholder": "Enter your Password"})
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match')], render_kw={"placeholder": "Enter your Confirm Password"})
     submit = SubmitField('Next')
     
     
@@ -235,10 +253,10 @@ countries = [
 class ProfileForm(FlaskForm):
 
     gender = RadioField('Gender', choices=[('male', 'Male'), ('female', 'Female')])
-    instagram_username = StringField('Instagram', validators=[DataRequired()])
-    facebook_username = StringField('Facebook', validators=[DataRequired()])
+    instagram_username = StringField('Instagram', validators=[DataRequired()], render_kw={"placeholder": "Enter your Instagram Username"})
+    facebook_username = StringField('Facebook', validators=[DataRequired()], render_kw={"placeholder": "Enter your Facebook Username"})
     date_of_birth = DateField('Date of Birth')
-    bio = StringField('Bio')
+    bio = StringField('Bio', render_kw={"placeholder": "Enter your Bio"})
     country = SelectField('Country', choices=countries)
     picture = FileField('Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Finish')
@@ -294,7 +312,7 @@ def load_user(user_id):
 def home():
 
     if current_user.is_authenticated:
-        return redirect(url_for('account'))
+        return redirect(url_for('account', username=current_user.username))
     
     else:
          return render_template('home.html')
@@ -319,7 +337,7 @@ def register():
     return render_template('register_quiz.html', form=form)
         
 
-
+# function for saving picture
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     f_name, f_text = os.path.splitext(form_picture.filename)
@@ -328,9 +346,6 @@ def save_picture(form_picture):
     form_picture.save(picture_path)
 
     return picture_fn 
-
-
-
 
 @app.route('/member-profile', methods=['GET', 'POST'])
 def profile():
@@ -370,8 +385,6 @@ def profile():
             
 
     return render_template('user_profile.html', form=form) 
-
-
 
 
 @app.route('/member-login', methods=['GET', 'POST'])
@@ -682,7 +695,7 @@ class Electronics(Resource):
                      db.session.commit()
             
            
-            if form.validate_on_submit(): # this also returns a POST request 
+            if form.validate_on_submit(): # when form from the electronics quiz route is valid upon submission
                  image_file = url_for('static', filename='../static/profile_pics/' + current_user.image_file)
                  user = UserResult.query.filter_by(session_id=session_user_result["session_id"]).first()
                  if user:
@@ -741,6 +754,16 @@ def quizfeed(username):
                 row.difference = f'{int(total_sec)}s ago'
                 db.session.commit()
         
+        # delete user result post on quizfeed if the time difference is more than or equal to 1d ago
+        user_result = UserResult.query.all()
+        for user in user_result:
+            if user:
+                delta = user.time_difference.total_seconds()
+                if delta > 86400:
+                    db.session.delete(user)
+                    db.session.commit()
+
+
         elecs_user = UserResult.query.filter_by(subject='Electronics').order_by(UserResult.no_correct_answer.desc()).all()
         elecs_scorer = [{"user":user.username, "score":user.score_percentage, "location":user.country} for user in elecs_user]
         scorer_elecs = []
@@ -767,7 +790,8 @@ def quizfeed(username):
                 continue
 
         scorer_comms = scorer_comms[:3]    
-       
+        
+
     return render_template('quizfeed.html', result_list=result_list, message=message, scorer_elecs=scorer_elecs, scorer_comms=scorer_comms)
 
 
@@ -946,7 +970,7 @@ def commsanswers():
 
 
 if __name__ == "__main__": 
-    app.run(debug=True)
+    app.run(host='localhost', debug=True)
 
 
 # render_template typically returns an html string so use make_response() to ensure 
