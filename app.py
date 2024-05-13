@@ -28,8 +28,8 @@ bcrypt = Bcrypt(app)
 
 #------ configuring the database -------#
 
-username='root'
-password= 'Toootsie@1430'
+username='ronnierflask'
+password= 'Tootsie@1430'
 port = '3306'
 host = 'localhost'
 database_name= 'quizapp'
