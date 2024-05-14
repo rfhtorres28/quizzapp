@@ -139,6 +139,7 @@ class UserResult(db.Model):
     @hybrid_property
     def time_difference(self):
         return self.latest_login - self.posted_time
+    
 
 class UserPost(db.Model):
 
@@ -580,7 +581,9 @@ class Electronics(Resource):
        
        def create_dynamic_fields(questions):
          
+         
          random.shuffle(questions)
+         
          for i, question in enumerate(questions, start=1):
             choices = [(option['letter'], option['content']) for option in question['options']] # a list of tuples, elements can be access same as a list
             field_name = f'Question {i}'
@@ -592,6 +595,8 @@ class Electronics(Resource):
        create_dynamic_fields(ece_questions)
        
        form = QuizForm() 
+     
+
        return make_response(render_template('elecsquiz.html', form=form))
        
    
