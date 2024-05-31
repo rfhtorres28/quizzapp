@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+        .nav-bar {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            height: 80px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  
+            background-color: black;
+        }
+       .nav-bar img {
+            width: 170px;
+            height: auto;
+        }
+        .nav-bar h1 {
+            color: white;
+            margin-left: 30%;
+            font-weight: normal;
+        }
+        .nav-bar a {
+            margin-left: 40%;
+            font-size: 20px;
+            color: white;
+            text-decoration: none;
+        }
+        .nav-bar a:hover {
+            color: rgb(8, 90, 255);
+        }
+        .answer-section {
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  
+            margin-top: 2%;
+            width: 900px;
+            height: 400px;
+        }
+        .value {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <img src="../static/logo.png">
+        <h1>Answers</h1>
+        <a href="{{url_for('account', username=current_user.username)}}">Home</a>
+    </div>
+    <div class="answer-section">
+        <ol type="1">  
+            {% for key, value in answer_key.items() %}
+                  <li>{{key}} <span class="value">{{value}}</span></li><br>
+            {% endfor %}
+        </ol>
+    </div>
+</body>
+</html>

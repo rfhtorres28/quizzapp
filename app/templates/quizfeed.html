@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Feed</title>
+    <style>
+        body, html {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+.fixed-element {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);  
+    border: 2px solid #069c17;
+    border-radius: 3%;
+  position: fixed;
+  top: 2%;
+  left: 2%;
+  bottom: 2%;
+  width: 370px;
+  height: 480px;
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Add a shadow effect for better visibility */
+  z-index: 1000; /* Ensure the fixed element appears above other content */
+  margin-top: -2px;
+}
+
+.scrollable-content {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); */
+  margin-top: 1%; /* Adjust this value to avoid content overlapping with the fixed element */
+  margin-left: -6%;
+  padding: 20px;
+  /* overflow-y: auto; Enable vertical scrolling for the scrollable portion */
+  /* width: 700px;
+  height: 1050px; */
+}
+.quiz-post {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #069c17;
+    margin-bottom: 1%;
+    width: 600px;
+    height: 100px;
+    margin-top: 2%;
+    padding: 4%;
+    border-radius: 30%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+}
+.quiz-post img {
+    position: absolute;
+    border-radius: 50%;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.7); 
+    margin-right: 75%;
+    margin-top: 3%;
+    /* margin-left: -55%; */
+}
+.quiz-post span {
+    margin-left: 6%;
+    font-size: 20px;
+}
+.post-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 420px;
+    height: 50px;
+    font-size: 13px;
+}
+
+.scrollable-header {
+   border: 2px solid #000;
+   border-radius: 5%;
+   width: 130px;
+   height: 30px;
+   text-align: center;
+   justify-content: center;
+   align-items: center;
+   text-shadow: 0 0 10px rgba(0, 0, 0, 0.5); 
+   margin-bottom: 2%;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+   padding: 3px; 
+   font-size: 24px;
+}
+.fixed-header { 
+    font-size: 22px;
+    margin-bottom: 3%;
+    margin-top: -2%;
+    color: rgb(0, 0, 235);
+}
+.subject-header {
+    font-size: 20px;
+    margin-bottom: -3%;
+}
+.scorer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.electronics-scorer, .communication-scorer, .math-scorer, .geas-scorer{
+    width: 300px;
+    height: 90px;
+    /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  */
+    text-align: center;
+}
+.home-link {
+    position: fixed;
+    margin-top: 38%;
+    font-size: 20px;
+}
+.home-link a{
+   
+    text-decoration: none;
+}
+.label {
+    margin-left: 3%;
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="fixed-element">
+             <span class="fixed-header">Score Leaderboard</span>
+             <span style="margin-top: -3%; margin-bottom: 4%; font-size: 16px;">(refresh to update the results)</span>
+             <div class="scorer"><br>
+                <span class="subject-header">-Electronics-</span>
+                <div class="electronics-scorer">
+                <ol type="1">
+                    {% for scorer in scorer_elecs %}
+                        <li>@{{scorer['user']}} got {{scorer['score']}}% ({{scorer['location']}})</li>
+                    {%endfor%}
+                </ol>
+              </div>
+                <span class="subject-header">-Communication-</span>
+                <div class="communication-scorer">
+                <ol type="1">
+                    {% for scorer in scorer_comms %}
+                        <li>@{{scorer['user']}} got {{scorer['score']}}% ({{scorer['location']}})</li>
+                    {%endfor%}
+                </ol>
+                </div>
+                <span class="subject-header">-Math-</span>
+                <div class="math-scorer">
+                    <ol type="1">
+                        {% for scorer in scorer_math %}
+                            <li>@{{scorer['user']}} got {{scorer['score']}}% ({{scorer['location']}})</li>
+                        {%endfor%}
+                    </ol>
+                    </div>
+                    <span class="subject-header">-GEAS-</span>
+                <div class="geas-scorer">
+                    <ol type="1">
+                        {% for scorer in scorer_geas %}
+                            <li>@{{scorer['user']}} got {{scorer['score']}}% ({{scorer['location']}})</li>
+                        {%endfor%}
+                    </ol>
+                    </div>
+             </div>
+             
+        </div>
+        <div class="scrollable-content">
+            <div class="scrollable-header">Quiz Feed</div>
+                {%if result_list%}
+                 {%for result in result_list%}
+                <div class="quiz-post">
+                    <div class = "post-header">
+                        <img src="{{result['user_pic']}}" alt="Example Image" class="user_profile_image" width="70px" height="70px">
+                        <span style="margin-left: 5%;"><a href="{{url_for('account', username=result['username'])}}" style="text-decoration: none;">@{{result['username']}}</a> got <span style="color: red; margin-left: 2px;">{{result['score_pct']}}%</span> in {{result['subject']}} Quiz</span> <br>
+                    </div>
+                   <span style="font-size: 15px; margin-top: 4%;">Answered {{result['difference']}}</span>
+                </div>
+                {%endfor%}
+                {%endif%}
+     
+            {%if message%}
+                <p>{{message}}</p>
+            {%endif%}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Results</title>
+    <link rel="stylesheet" href="static/main.css">
+    <style>
+  body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .nav-bar {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            height: 80px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  
+            background-color: black;
+        }
+       .nav-bar img {
+            width: 170px;
+            height: auto;
+        }
+        .nav-bar h1 {
+            color: white;
+            margin-left: 27%;
+            font-weight: normal;
+            font-size: 27px;
+            text-shadow: 4px 2px 4px rgba(255, 255, 255, 0.8);
+        }
+        .nav-bar a {
+            margin-left: 40%;
+            font-size: 20px;
+            color: white;
+            text-decoration: none;
+        }
+        .nav-bar a:hover {
+            color: rgb(8, 90, 255);
+        }
+        .content-section {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  
+          width: 70%;
+          height: 90%;
+          margin-top: 2%;
+          margin-bottom: 3%;
+        }
+        .content-section ol {
+            margin-top: 1%;
+        }
+        .content-section form {
+          margin-left: -7%;
+        }
+        .result {
+            color: red;
+        }
+        .content-section .restart-test {
+            margin-top: -5%;
+        }
+      
+      </style>
+    
+</head>
+
+<body>
+    <div class="nav-bar">
+        <img src="../static/logo.png">
+        <h1>Answer History</h1>
+        <a href="{{url_for('account', username=current_user.username)}}">Home</a>
+    </div>  
+    <div class="content-section">
+    <h1 class="result">Your score is {{no_correct_answer}} out of {{total_questions}}, {{score_percentage}}%</h1>
+   <ol type="1">
+        {% for field in form %}
+            {% if field.name not in ['csrf_token', 'user_id'] %}
+                <p>
+                    <p>{{field.id}} {{ field.label.text }}</p>
+                    {% for option in field.choices %}
+                        <label>
+                            <input type="radio" name="{{ field.id }}" value="{{ option[0] }}" {% if option[0] == field.data %} checked{% endif %} disabled> <!-- "checked" attribute is used when making a radio button selected by default -->
+                            {{ option[1] }}
+                        </label><br>
+                    {% endfor %}
+                </p>
+            {% endif %}
+        {% endfor %}
+    </ol>
+    <br>
+    <button type="button" onclick="window.location.href = '{{url_for('math')}}';" class="restart-test">Restart the Test</button>
+   <p> <button type="button" onclick="window.location.href = '{{url_for('mathanswers')}}';" class="correct-answer">Correct Answers</button></p>
+    </div>
+    
+
+</body>
+</html>

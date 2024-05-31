@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Home</title>
+        <style> 
+        nav{
+             background-color: #333; /* Background color of the navigation bar */
+            color: #fff; /* Text color of the navigation links */
+            padding: 10px; /* Padding around the navigation links */
+            height: 60px; 
+           }
+
+        ul {
+            list-style-type: none; /* Remove bullet points from the list */
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+           }
+           
+        li {
+            display: inline; /* Display list items horizontally */
+            margin-right: 20px; /* Add spacing between navigation links */
+           }
+       
+        body, html {
+                margin: 0;
+                background-color: #ffffff;
+                padding-bottom: 10px;
+             }
+        .menu li{
+            display: inline-block;
+            margin-left: 50px;
+            margin-top: 20px;
+
+        }
+        
+        li.title-nav {
+            font-family: Arial, sans-serif; /* Set the font family */
+            font-size: 25px; /* Set the font size */
+            font-weight: None; /* Set the font weight */
+        }
+    
+        li.electronics {
+            font-family: sans-serif;
+            font-size: 17px;
+            position: relative;
+            top: -3px;
+            margin-left: 200px;
+        }
+        li.communications {
+            font-family: sans-serif;
+            font-size: 17px;
+            position: relative;
+            top: -3px;
+            margin-left: 10px;
+        }
+        li.geas {
+            font-family: sans-serif;
+            font-size: 17px;
+            position: relative;
+            margin-left: 10px;
+            top: -3px;
+        }
+        li.math {
+            font-family: sans-serif;
+            font-size: 17px;
+            position: relative;
+            top: -3px;
+            margin-left: 10px;
+        } 
+
+        li.register {
+                margin-left: 450px; 
+                font-family: sans-serif;
+                font-size: 17px;
+                position: relative;
+                top: -3px;
+            }
+
+        li.login {
+               
+                font-family: sans-serif;
+                font-size: 17px;
+                position: relative;
+                margin-left: 10px;
+                top: -3px;
+            }
+          
+            a {
+                color: #fff; /* Text color of the navigation links */
+                text-decoration: none; /* Remove underline from links */
+            }
+        .logo {
+            position: absolute;
+            height: auto;
+            left: 0;
+            width: 170px;
+            margin-top: -17px;
+        }
+        .main-block {
+            background-color: #ffffff;
+            margin-top: 4%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);  */
+        }
+        .main-content {
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 940px;
+            height: 300px;
+            background-color: #f5f5f5;
+            
+
+        }
+            
+            </style>
+    
+</head>
+<body>
+    <nav> 
+        <ul class="menu">
+            <img src="static\logo.png" alt="Example Image" class="logo">
+            <li class="electronics"><a href = "{{url_for('electronics')}}">Electronics</a></li>
+            <li class="communications"><a href = "{{url_for('communications')}}">Communications</a></li>
+            <li class="geas"><a href = "{{url_for('geas')}}">GEAS</a></li>
+            <li class="math"><a href = "{{url_for('math')}}">Math</a></li>
+            <li class="register"><a href = "{{url_for('register')}}">Register</a></li>
+            <li class="login"><a href = "{{url_for('login')}}">Login</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-block">
+    <div style="border-radius: 10px; width: 1000px; height: 360px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);">
+    <div class="main-content">
+        <h1 style="text-shadow: 1px 1px 2px rgba(0,0,0,0.5); font-weight: normal; font-size: 35px; font-family: 'Libre Baskerville', serif; ">Welcome to Electron Enthusiast students!</h1>
+        <p style="padding: 15px; text-align: justify; font-size: 17px; font-family: 'Source Sans Pro', sans-serif;">This website is designed for students who wants to practice their problem-solving skills in the field of electronics engineering. 
+        You can choose subjects ranging from Math, General Applied Science, Electronics and Communications. The difficulty of each course category is mixed to simulate the real board exam scenario.
+         Correct answers are provided after exam completion. </p>
+         <h4 style="font-size: 23px; font-weight: normal;">Register now and start practicing your analytical skills engineers!</h4>
+    </div> 
+    </div>
+    </div>
+
+
+    <hr style="border: none; height: 1px; background-color: black; margin-top: 40px;">
+    <div class="about-me" style="padding-bottom: 10px; margin-top: -2%; text-align: justify; display: flex; flex-direction: column; align-items: center;">
+        <div style="padding-top: 10px; width: 650px; height: 100px; ">
+            <h4 style="text-align: center;">About electronenthusiast.com</h4>
+        <div style="border-radius: 10px;"><p style="margin-top: -1% font-size: 25px; color: #0041b0;">Electron enthusiast website was designed and programmed by ronnier franz torres using python, HTML and CSS. It provides free access to engineering students for their review in exams, quiz and their upcoming board exams. </p></div>
+       </div>
+    </div>
+
+</body>
+
+
+
+</html>
