@@ -368,7 +368,7 @@ class GEASQuestionsAPI(Resource):
    def get(self):
            questions = GEASQuestions.query.all()
            geas_questions = [{"question_id":question.id, "question":question.content} for question in questions]
-           data = {"math_questions":geas_questions}
+           data = {"geas_questions":geas_questions}
            print('Question retrieve from the database successfully')
            return jsonify(data)
            
