@@ -1,13 +1,29 @@
 from flask import request, jsonify
+from flask import jsonify
 from flask_restful import Resource
 from .models import ElecsQuestions, ElecsOptions, CommsQuestions, CommsOptions, MathQuestions, MathOptions, GEASOptions, GEASQuestions
 from . import db, api
 from sqlalchemy import func
+from functools import wraps
 
 
+# randomly generated using secrets module
+API_KEY = 'd92847608f9ffd35' 
 
 
-# Creating API Class for to manage Electronics Questions 
+     
+# Creating API Class to store API key
+class APIKey(Resource):
+     
+     def get(self):
+          api_key = {"api_key":API_KEY}
+          return jsonify(api_key)
+
+# create an API Endpoint for APIKey class
+api.add_resource(APIKey, '/api-key')    
+
+
+# Creating API Class to manage Electronics Questions 
 class ElectronicsQuestionsAPI(Resource):
    
 
@@ -58,7 +74,7 @@ class ElectronicsQuestionsAPI(Resource):
                  db.session.commit()
                  return jsonify({"message":"Question added succesfully"})
    
-   # Update questions from the database        
+   # Update questions from the database     
    def put(self):
        print("PUT request is received")
        data = request.get_json()
@@ -97,12 +113,14 @@ api.add_resource(ElectronicsQuestionsAPI, '/elecsqn-api')
 # Creating API Class for to manage Electronics Options 
 class ElectronicsChoicesAPI(Resource):
 
+
     def get(self):
         qn = ElecsQuestions.query.all()
         opn = ElecsOptions.query.all()
         elecs_questions = [{"id":question.id, "content":question.content, "options":[{"question_no":option.question_no, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
         return jsonify(elecs_questions)
     
+
     def put(self):
         data = request.get_json()
         options = data.get('options')
@@ -176,7 +194,7 @@ class CommunicationQuestionsAPI(Resource):
                  return jsonify({"message":"Question added succesfully"})
 
 
-   # Update questions from the database        
+   # Update questions from the database      
    def put(self):
        print("PUT request is received")
        data = request.get_json()
@@ -213,12 +231,14 @@ api.add_resource(CommunicationQuestionsAPI, '/commsqn-api')
 # Creating API Class for to manage Communication Options 
 class CommunicationsChoicesAPI(Resource):
 
+
     def get(self):
         qn = CommsQuestions.query.all()
         opn = CommsOptions.query.all()
         elecs_questions = [{"id":question.id, "content":question.content, "options":[{"question_no":option.question_no, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
         return jsonify(elecs_questions)
-   
+
+
     def put(self):
         data = request.get_json()
         options = data.get('options')
@@ -294,7 +314,7 @@ class MathQuestionsAPI(Resource):
                  return jsonify({"message":"Question added succesfully"})
 
 
-   # Update questions from the database        
+   # Update questions from the database       
    def put(self):
        print("PUT request is received")
        data = request.get_json()
@@ -330,6 +350,8 @@ api.add_resource(MathQuestionsAPI, '/mathqn-api')
 
 # Creating API Class to manage Math Choices 
 class MathChoicesAPI(Resource):
+
+
 
     def get(self):
         qn = MathQuestions.query.all()
@@ -413,7 +435,7 @@ class GEASQuestionsAPI(Resource):
                  return jsonify({"message":"Question added succesfully"})
 
 
-   # Update questions from the database        
+   # Update questions from the database      
    def put(self):
        print("PUT request is received")
        data = request.get_json()
@@ -450,12 +472,14 @@ api.add_resource(GEASQuestionsAPI, '/geasqn-api')
 # Creating API Class to manage Math Choices 
 class GEASChoicesAPI(Resource):
 
+
     def get(self):
         qn = GEASQuestions.query.all()
         opn = GEASOptions.query.all()
         geas_questions = [{"id":question.id, "content":question.content, "options":[{"question_no":option.question_no, "letter":option.letter, "content":option.content, "is_correct":option.is_correct} for option in opn if option.question_no == question.id]} for question in qn]
         return jsonify(geas_questions)
-   
+    
+
 
     def put(self):
         data = request.get_json()

@@ -106,11 +106,15 @@ def login():
     messages = get_flashed_messages()
     if form.validate_on_submit():
         user = UserDetails.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user) # Get the state of the user that is currently login, so it means that if a user logs in, it is stored in the login_user()
-            return redirect(url_for('account', username=user.username))
+        if user:
+            if bcrypt.check_password_hash(user.password, form.password.data):
+               login_user(user) # Get the state of the user that is currently login, so it means that if a user logs in, it is stored in the login_user()
+               return redirect(url_for('account', username=user.username))
+            else:
+                flash('Password is incorrect, Please try again')
+                return redirect(url_for('login'))
         else:
-            flash('User not found, Please try again')
+            flash('Email not found, Please try again')
             return redirect(url_for('login'))
         
     
